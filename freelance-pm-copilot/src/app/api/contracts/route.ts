@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase-client';
+import { ContractService } from '@/lib/firestore-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,15 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // Get all contracts for the user
-    const contractsRef = collection(db, 'contracts');
-    const q = query(contractsRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
-    
-    const contracts = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    // Get all contracts for the user using the service
+    const contracts = await ContractService.getContractsByUser(userId);
 
     return NextResponse.json({ contracts });
   } catch (error) {
@@ -37,23 +29,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const contractId = `contract_${Date.now()}`;
-    const contractRef = doc(db, 'contracts', contractId);
-
-    const contractData = {
-      id: contractId,
+    // Create contract using the service
+    const contractId = await ContractService.createContract({
       title,
       clientName,
       clientEmail,
       userId,
-      status: 'analyzing',
-      createdAt: new Date(),
-      uploadedAt: new Date(),
-      pdfUrl: '', // Will be set when file is uploaded
-      analysis: null // Will be set by AI analysis
-    };
-
-    await setDoc(contractRef, contractData);
+      status: 'analyzing'
+    });
 
     return NextResponse.json({ 
       success: true, 

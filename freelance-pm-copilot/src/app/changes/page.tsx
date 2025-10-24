@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -21,38 +21,10 @@ import {
   User,
   Mail
 } from 'lucide-react';
+import { ChangeRequestService, ContractService } from '@/lib/firestore-service';
+import { ChangeRequest, Contract } from '@/lib/firestore-schema';
 
-interface ChangeRequest {
-  id: string;
-  contractId: string;
-  contractTitle: string;
-  clientName: string;
-  requestText: string;
-  analysis: {
-    type: 'bug' | 'in-scope' | 'out-of-scope';
-    impact: {
-      time: string;
-      cost: string;
-      scope: string;
-    };
-    options: Array<{
-      title: string;
-      description: string;
-      timeline: string;
-      cost: string;
-    }>;
-  };
-  selectedOption: number;
-  status: 'pending' | 'approved' | 'rejected' | 'applied';
-  evidence: Array<{
-    type: string;
-    url: string;
-    timestamp: string;
-  }>;
-  emailDraft: string;
-  pdfUrl?: string;
-  createdAt: string;
-}
+// Using ChangeRequest interface from firestore-schema
 
 export default function ChangesPage() {
   const { user } = useAuth();
@@ -62,130 +34,85 @@ export default function ChangesPage() {
   const [selectedContract, setSelectedContract] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
+  
+  // Real-time data
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for demo
-  const contracts = [
-    { id: '1', title: 'Acme Corp Website', clientName: 'Acme Corporation' },
-    { id: '2', title: 'TechStart Mobile App', clientName: 'TechStart Inc' },
-    { id: '3', title: 'OldClient Legacy System', clientName: 'OldClient LLC' }
-  ];
+  // Set up real-time listeners
+  useEffect(() => {
+    if (!user) return;
 
-  const changes: ChangeRequest[] = [
-    {
-      id: '1',
-      contractId: '1',
-      contractTitle: 'Acme Corp Website',
-      clientName: 'Acme Corporation',
-      requestText: 'Can we add a blog section to the website? Also, we need the ability to manage content through an admin panel.',
-      analysis: {
-        type: 'out-of-scope',
-        impact: {
-          time: '2-3 weeks',
-          cost: '$3,000 - $5,000',
-          scope: 'Major addition - blog system + admin panel'
-        },
-        options: [
-          {
-            title: 'Basic Blog',
-            description: 'Simple blog with basic CMS functionality',
-            timeline: '2 weeks',
-            cost: '$3,000'
-          },
-          {
-            title: 'Advanced Blog + Admin',
-            description: 'Full-featured blog with comprehensive admin panel',
-            timeline: '3 weeks',
-            cost: '$5,000'
-          },
-          {
-            title: 'Custom Solution',
-            description: 'Tailored blog system with advanced features',
-            timeline: '4 weeks',
-            cost: '$7,500'
-          }
-        ]
-      },
-      selectedOption: 1,
-      status: 'pending',
-      evidence: [],
-      emailDraft: 'Thank you for your change request. I\'ve analyzed your request for a blog section and admin panel...',
-      createdAt: '2024-01-10'
-    },
-    {
-      id: '2',
-      contractId: '2',
-      contractTitle: 'TechStart Mobile App',
-      clientName: 'TechStart Inc',
-      requestText: 'The login button is not working on iOS devices.',
-      analysis: {
-        type: 'bug',
-        impact: {
-          time: '2-3 days',
-          cost: 'No additional cost',
-          scope: 'Bug fix - no scope change'
-        },
-        options: [
-          {
-            title: 'Quick Fix',
-            description: 'Fix the iOS login issue',
-            timeline: '2 days',
-            cost: 'No charge'
-          }
-        ]
-      },
-      selectedOption: 0,
-      status: 'approved',
-      evidence: [
-        {
-          type: 'email',
-          url: 'email_approval_1',
-          timestamp: '2024-01-08'
+    setLoading(true);
+    
+    // Subscribe to contracts
+    const unsubscribeContracts = ContractService.subscribeToContracts(
+      user.uid, 
+      (contractsData) => {
+        setContracts(contractsData);
+        setLoading(false);
+      }
+    );
+
+    // Subscribe to change requests (get from all contracts)
+    const unsubscribeChangeRequests = ContractService.subscribeToContracts(
+      user.uid,
+      async (contractsData) => {
+        const allChangeRequests: ChangeRequest[] = [];
+        for (const contract of contractsData) {
+          const contractChanges = await ChangeRequestService.getChangeRequestsByContract(contract.id);
+          allChangeRequests.push(...contractChanges);
         }
-      ],
-      emailDraft: 'I\'ve identified the iOS login issue and will fix it within 2 days...',
-      createdAt: '2024-01-08'
-    }
-  ];
+        setChangeRequests(allChangeRequests);
+      }
+    );
+
+    return () => {
+      unsubscribeContracts();
+      unsubscribeChangeRequests();
+    };
+  }, [user]);
+
+  // Use real-time data instead of mock data
+  const changes = changeRequests;
 
   const handleAnalyzeRequest = async () => {
-    if (!requestText.trim() || !selectedContract) return;
+    if (!requestText.trim() || !selectedContract || !user) return;
 
     setAnalyzing(true);
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      const mockAnalysis = {
-        type: 'out-of-scope',
-        impact: {
-          time: '1-2 weeks',
-          cost: '$2,000 - $4,000',
-          scope: 'Medium addition - new feature request'
+    try {
+      const response = await fetch('/api/changes/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        options: [
-          {
-            title: 'Basic Implementation',
-            description: 'Simple version of the requested feature',
-            timeline: '1 week',
-            cost: '$2,000'
-          },
-          {
-            title: 'Full Implementation',
-            description: 'Complete feature with all requested functionality',
-            timeline: '2 weeks',
-            cost: '$4,000'
-          },
-          {
-            title: 'Premium Implementation',
-            description: 'Advanced version with additional features',
-            timeline: '3 weeks',
-            cost: '$6,000'
-          }
-        ]
-      };
+        body: JSON.stringify({
+          requestText,
+          contractId: selectedContract,
+          userId: user.uid
+        }),
+      });
+
+      const data = await response.json();
       
-      setAnalysis(mockAnalysis);
+      if (data.success) {
+        setAnalysis(data.analysis);
+        // Refresh change requests to show the new one
+        const contractChanges = await ChangeRequestService.getChangeRequestsByContract(selectedContract);
+        setChangeRequests(prev => {
+          const otherChanges = prev.filter(cr => cr.contractId !== selectedContract);
+          return [...otherChanges, ...contractChanges];
+        });
+      } else {
+        console.error('Analysis failed:', data.error);
+      }
+    } catch (error) {
+      console.error('Error analyzing request:', error);
+    } finally {
       setAnalyzing(false);
-    }, 2000);
+    }
   };
 
   const handleCreateChange = () => {
@@ -242,6 +169,17 @@ export default function ChangesPage() {
         return <Badge variant="outline">{type}</Badge>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading change requests...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

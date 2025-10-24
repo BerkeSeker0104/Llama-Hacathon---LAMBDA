@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +17,18 @@ import {
   Users,
   LogOut
 } from 'lucide-react';
+import { ContractService, ChangeRequestService, CommunicationService } from '@/lib/firestore-service';
+import { Contract, ChangeRequest, Communication } from '@/lib/firestore-schema';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  
+  // State for real-time data
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const handleLogout = async () => {
     try {
@@ -31,6 +39,49 @@ export default function DashboardPage() {
     }
   };
 
+  // Set up real-time listeners
+  useEffect(() => {
+    if (!user) return;
+
+    setDataLoading(true);
+    
+    // Subscribe to contracts
+    const unsubscribeContracts = ContractService.subscribeToContracts(
+      user.uid, 
+      (contractsData) => {
+        setContracts(contractsData);
+        setDataLoading(false);
+      }
+    );
+
+    // Subscribe to change requests (get from all contracts)
+    const unsubscribeChangeRequests = ContractService.subscribeToContracts(
+      user.uid,
+      async (contractsData) => {
+        const allChangeRequests: ChangeRequest[] = [];
+        for (const contract of contractsData) {
+          const contractChanges = await ChangeRequestService.getChangeRequestsByContract(contract.id);
+          allChangeRequests.push(...contractChanges);
+        }
+        setChangeRequests(allChangeRequests);
+      }
+    );
+
+    // Subscribe to communications
+    const unsubscribeCommunications = CommunicationService.subscribeToCommunications(
+      user.uid,
+      (communicationsData) => {
+        setCommunications(communicationsData);
+      }
+    );
+
+    return () => {
+      unsubscribeContracts();
+      unsubscribeChangeRequests();
+      unsubscribeCommunications();
+    };
+  }, [user]);
+
   useEffect(() => {
     console.log('Dashboard: useEffect - user:', user ? user.email : 'null', 'loading:', loading);
     if (!loading && !user) {
@@ -39,7 +90,7 @@ export default function DashboardPage() {
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  if (loading || dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -54,25 +105,86 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Mock data for demo
-  const dashboardData = {
-    upcomingPayments: [
-      { id: '1', client: 'Acme Corp', amount: 2500, currency: 'USD', dueDate: '2024-01-15', milestone: 'Phase 1 Complete' },
-      { id: '2', client: 'TechStart Inc', amount: 1800, currency: 'USD', dueDate: '2024-01-20', milestone: 'Design Review' }
-    ],
-    overduePayments: [
-      { id: '3', client: 'OldClient LLC', amount: 3200, currency: 'USD', dueDate: '2023-12-20', milestone: 'Final Delivery', daysOverdue: 15 }
-    ],
-    activeContracts: 3,
-    recentChanges: [
-      { id: '1', contract: 'Acme Corp Website', type: 'out-of-scope', status: 'pending', date: '2024-01-10' },
-      { id: '2', contract: 'TechStart Mobile App', type: 'in-scope', status: 'approved', date: '2024-01-08' }
-    ],
-    riskItems: [
-      { id: '1', contract: 'Acme Corp', risk: 'Scope creep detected', severity: 'high' },
-      { id: '2', contract: 'TechStart Inc', risk: 'Payment delay risk', severity: 'medium' }
-    ]
-  };
+  // Calculate dashboard data from real Firebase data
+  const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'analyzed').length;
+  
+  // Get upcoming payments from contract analysis
+  const upcomingPayments = contracts
+    .filter(contract => contract.analysis?.paymentPlan)
+    .flatMap(contract => 
+      contract.analysis!.paymentPlan
+        .filter(payment => payment.status === 'pending')
+        .map(payment => ({
+          id: payment.id,
+          client: contract.clientName,
+          amount: payment.amount,
+          currency: payment.currency,
+          dueDate: payment.dueDate,
+          milestone: contract.analysis!.milestones.find(m => m.id === payment.milestoneId)?.title || 'Payment'
+        }))
+    )
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .slice(0, 5);
+
+  // Get overdue payments
+  const overduePayments = contracts
+    .filter(contract => contract.analysis?.paymentPlan)
+    .flatMap(contract => 
+      contract.analysis!.paymentPlan
+        .filter(payment => {
+          const dueDate = new Date(payment.dueDate);
+          const now = new Date();
+          return payment.status === 'pending' && dueDate < now;
+        })
+        .map(payment => {
+          const dueDate = new Date(payment.dueDate);
+          const now = new Date();
+          const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+          return {
+            id: payment.id,
+            client: contract.clientName,
+            amount: payment.amount,
+            currency: payment.currency,
+            dueDate: payment.dueDate,
+            milestone: contract.analysis!.milestones.find(m => m.id === payment.milestoneId)?.title || 'Payment',
+            daysOverdue
+          };
+        })
+    )
+    .sort((a, b) => b.daysOverdue - a.daysOverdue);
+
+  // Get recent changes
+  const recentChanges = changeRequests
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+    .map(change => {
+      const contract = contracts.find(c => c.id === change.contractId);
+      return {
+        id: change.id,
+        contract: contract?.title || 'Unknown Contract',
+        type: change.type,
+        status: change.status,
+        date: change.createdAt.toLocaleDateString()
+      };
+    });
+
+  // Get risk items from contract analysis
+  const riskItems = contracts
+    .filter(contract => contract.analysis?.risks)
+    .flatMap(contract => 
+      contract.analysis!.risks
+        .filter(risk => risk.status === 'open')
+        .map(risk => ({
+          id: risk.id,
+          contract: contract.title,
+          risk: risk.title,
+          severity: risk.severity
+        }))
+    )
+    .sort((a, b) => {
+      const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+      return severityOrder[b.severity] - severityOrder[a.severity];
+    });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,9 +224,9 @@ export default function DashboardPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.upcomingPayments.length}</div>
+              <div className="text-2xl font-bold">{upcomingPayments.length}</div>
               <p className="text-xs text-muted-foreground">
-                ${dashboardData.upcomingPayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} total
+                ${upcomingPayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} total
               </p>
             </CardContent>
           </Card>
@@ -125,9 +237,9 @@ export default function DashboardPage() {
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{dashboardData.overduePayments.length}</div>
+              <div className="text-2xl font-bold text-red-600">{overduePayments.length}</div>
               <p className="text-xs text-muted-foreground">
-                ${dashboardData.overduePayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} overdue
+                ${overduePayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} overdue
               </p>
             </CardContent>
           </Card>
@@ -138,7 +250,7 @@ export default function DashboardPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.activeContracts}</div>
+              <div className="text-2xl font-bold">{activeContracts}</div>
               <p className="text-xs text-muted-foreground">Currently active</p>
             </CardContent>
           </Card>
@@ -149,7 +261,7 @@ export default function DashboardPage() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.riskItems.length}</div>
+              <div className="text-2xl font-bold">{riskItems.length}</div>
               <p className="text-xs text-muted-foreground">Need attention</p>
             </CardContent>
           </Card>
@@ -168,7 +280,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dashboardData.upcomingPayments.map((payment) => (
+                {upcomingPayments.map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{payment.client}</p>
@@ -202,7 +314,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dashboardData.overduePayments.map((payment) => (
+                {overduePayments.map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between p-3 border border-red-200 rounded-lg bg-red-50">
                     <div>
                       <p className="font-medium">{payment.client}</p>
@@ -241,7 +353,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dashboardData.recentChanges.map((change) => (
+                {recentChanges.map((change) => (
                   <div key={change.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{change.contract}</p>
@@ -277,7 +389,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dashboardData.riskItems.map((risk) => (
+                {riskItems.map((risk) => (
                   <div key={risk.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{risk.contract}</p>

@@ -18,47 +18,10 @@ import {
   Mail,
   ArrowLeft
 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase-client';
+import { ContractService, ChangeRequestService } from '@/lib/firestore-service';
+import { Contract, ChangeRequest } from '@/lib/firestore-schema';
 
-interface Contract {
-  id: string;
-  title: string;
-  clientName: string;
-  clientEmail: string;
-  uploadedAt: any;
-  pdfUrl: string;
-  status: 'analyzing' | 'active' | 'completed';
-  analysis?: {
-    deliverables: Array<{
-      id: string;
-      title: string;
-      description: string;
-      acceptanceCriteria: string;
-    }>;
-    milestones: Array<{
-      id: string;
-      title: string;
-      dueDate: string;
-      deliverableIds: string[];
-    }>;
-    paymentPlan: Array<{
-      id: string;
-      milestoneId: string;
-      amount: number;
-      currency: string;
-      dueDate: string;
-      status: 'upcoming' | 'overdue' | 'paid';
-    }>;
-    risks: Array<{
-      id: string;
-      category: string;
-      severity: 'low' | 'medium' | 'high';
-      description: string;
-    }>;
-    scope: string;
-  };
-}
+// Using Contract interface from firestore-schema
 
 export default function ContractDetailPage() {
   const [contract, setContract] = useState<Contract | null>(null);
@@ -73,11 +36,10 @@ export default function ContractDetailPage() {
 
     const fetchContract = async () => {
       try {
-        const contractRef = doc(db, 'contracts', contractId);
-        const contractSnap = await getDoc(contractRef);
+        const contractData = await ContractService.getContract(contractId);
         
-        if (contractSnap.exists()) {
-          setContract({ id: contractSnap.id, ...contractSnap.data() } as Contract);
+        if (contractData) {
+          setContract(contractData);
         } else {
           console.error('Contract not found');
           router.push('/dashboard');
