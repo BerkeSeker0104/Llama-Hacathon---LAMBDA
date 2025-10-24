@@ -318,7 +318,7 @@ export default function ChangesPage() {
                   </div>
                   <div className="flex space-x-2">
                     {getStatusBadge(change.status)}
-                    {getTypeBadge(change.analysis.type)}
+                    {change.analysis && getTypeBadge(change.analysis.type)}
                   </div>
                 </div>
 
@@ -328,20 +328,22 @@ export default function ChangesPage() {
                     <p className="text-sm text-gray-600 mt-1">{change.requestText}</p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Time Impact</Label>
-                      <p className="text-sm text-gray-600">{change.analysis.impact.time}</p>
+                  {change.analysis && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Time Impact</Label>
+                        <p className="text-sm text-gray-600">{change.analysis.impact.time}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Cost Impact</Label>
+                        <p className="text-sm text-gray-600">{change.analysis.impact.cost}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Scope Impact</Label>
+                        <p className="text-sm text-gray-600">{change.analysis.impact.scope}</p>
+                      </div>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Cost Impact</Label>
-                      <p className="text-sm text-gray-600">{change.analysis.impact.cost}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium">Scope Impact</Label>
-                      <p className="text-sm text-gray-600">{change.analysis.impact.scope}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="border-t pt-4">
