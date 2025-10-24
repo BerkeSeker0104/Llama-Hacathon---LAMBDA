@@ -349,7 +349,7 @@ export default function ChangesPage() {
                 <div className="border-t pt-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
-                      Created: {change.createdAt}
+                      Created: {change.createdAt.toDate().toLocaleDateString()}
                     </div>
                     <div className="flex space-x-2">
                       {change.status === 'pending' && (
