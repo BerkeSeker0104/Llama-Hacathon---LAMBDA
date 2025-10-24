@@ -13,12 +13,15 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('HomePage: useEffect - user:', user ? user.email : 'null', 'loading:', loading);
     if (!loading && user) {
+      console.log('HomePage: User authenticated, redirecting to dashboard');
       router.push('/dashboard');
     }
   }, [user, loading, router]);
 
   if (loading) {
+    console.log('HomePage: Loading state - showing spinner');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -28,6 +31,8 @@ export default function Home() {
       </div>
     );
   }
+
+  console.log('HomePage: Rendering landing page - user:', user ? user.email : 'null');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
