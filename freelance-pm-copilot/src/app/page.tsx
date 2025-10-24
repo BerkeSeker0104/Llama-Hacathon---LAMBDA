@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, DollarSign, Calendar, Users, LogOut, Home } from 'lucide-react';
+import { FileText, DollarSign, Calendar, Users, LogOut, Home as HomeIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -61,7 +61,7 @@ export default function Home() {
               {user ? (
                 <>
                   <Button variant="outline" onClick={() => router.push('/dashboard')}>
-                    <Home className="h-4 w-4 mr-2" />
+                    <HomeIcon className="h-4 w-4 mr-2" />
                     Dashboard
                   </Button>
                   <Button variant="outline" onClick={handleLogout}>
