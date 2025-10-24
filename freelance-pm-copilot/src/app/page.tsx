@@ -12,11 +12,15 @@ export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  console.log('HomePage: Render - user:', user ? user.email : 'null', 'loading:', loading);
+
   useEffect(() => {
-    console.log('HomePage: useEffect - user:', user ? user.email : 'null', 'loading:', loading);
+    console.log('HomePage: useEffect triggered - user:', user ? user.email : 'null', 'loading:', loading);
     if (!loading && user) {
       console.log('HomePage: User authenticated, redirecting to dashboard');
       router.push('/dashboard');
+    } else if (!loading && !user) {
+      console.log('HomePage: No user, showing landing page');
     }
   }, [user, loading, router]);
 
