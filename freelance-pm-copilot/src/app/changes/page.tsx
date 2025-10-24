@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,24 +14,21 @@ import {
   AlertTriangle, 
   CheckCircle,
   Clock,
-  DollarSign,
-  Calendar,
-  User,
   Mail
 } from 'lucide-react';
-import { ChangeRequestService, ContractService } from '@/lib/firestore-service';
-import { ChangeRequest, Contract } from '@/lib/firestore-schema';
+import { ContractService } from '@/lib/firestore-service';
+import { ChangeRequestService } from '@/lib/firestore-service';
+import { ChangeRequest, Contract, ChangeAnalysis } from '@/lib/firestore-schema';
 
 // Using ChangeRequest interface from firestore-schema
 
 export default function ChangesPage() {
   const { user } = useAuth();
-  const router = useRouter();
   const [showNewForm, setShowNewForm] = useState(false);
   const [requestText, setRequestText] = useState('');
   const [selectedContract, setSelectedContract] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<ChangeAnalysis | null>(null);
   
   // Real-time data
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -207,7 +202,7 @@ export default function ChangesPage() {
             <CardHeader>
               <CardTitle>Create New Change Request</CardTitle>
               <CardDescription>
-                Analyze a client's change request and generate options
+                Analyze a client&apos;s change request and generate options
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -276,7 +271,7 @@ export default function ChangesPage() {
                   <div className="mb-4">
                     <Label className="text-sm font-medium">Proposed Options</Label>
                     <div className="space-y-2">
-                      {analysis.options.map((option: any, index: number) => (
+                      {analysis.options.map((option: { title: string; description: string; timeline: string; cost: string }, index: number) => (
                         <div key={index} className="border rounded p-3">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium">{option.title}</h4>
@@ -349,7 +344,7 @@ export default function ChangesPage() {
                 <div className="border-t pt-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
-                      Created: {change.createdAt.toDate().toLocaleDateString()}
+                      Created: {change.createdAt instanceof Date ? change.createdAt.toLocaleDateString() : new Date((change.createdAt as { seconds: number }).seconds * 1000).toLocaleDateString()}
                     </div>
                     <div className="flex space-x-2">
                       {change.status === 'pending' && (
