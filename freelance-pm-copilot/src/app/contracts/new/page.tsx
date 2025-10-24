@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { ContractService } from '@/lib/firestore-service';
 import PDFUpload from '@/components/PDFUpload';
+import ResponsiveHeader from '@/components/ResponsiveHeader';
+import Loading from '@/components/Loading';
+import { useToast } from '@/components/Toast';
 
 export default function NewContractPage() {
   const [clientName, setClientName] = useState('');
@@ -21,6 +24,7 @@ export default function NewContractPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
+  const { addToast } = useToast();
 
   const handleCreateContract = async () => {
     if (!user || !contractTitle || !clientName || !clientEmail) {
@@ -43,10 +47,12 @@ export default function NewContractPage() {
 
       setContractId(contractId);
       setStatus('idle');
+      addToast('success', 'Contract created successfully!', 'You can now upload the PDF file.');
     } catch (error: any) {
       console.error('Error creating contract:', error);
       setError(error.message || 'Failed to create contract');
       setStatus('error');
+      addToast('error', 'Failed to create contract', error.message);
     }
   };
 
@@ -107,19 +113,11 @@ export default function NewContractPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">New Contract</h1>
-              <p className="text-gray-600">Upload and analyze a new contract</p>
-            </div>
-            <Button variant="outline" onClick={() => router.back()}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </header>
+      <ResponsiveHeader 
+        title="New Contract"
+        subtitle="Upload and analyze a new contract"
+        showQuickActions={false}
+      />
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

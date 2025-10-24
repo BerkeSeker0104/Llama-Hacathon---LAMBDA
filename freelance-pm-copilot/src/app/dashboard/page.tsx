@@ -19,10 +19,15 @@ import {
 } from 'lucide-react';
 import { ContractService, ChangeRequestService, CommunicationService } from '@/lib/firestore-service';
 import { Contract, ChangeRequest, Communication } from '@/lib/firestore-schema';
+import ResponsiveHeader from '@/components/ResponsiveHeader';
+import ResponsiveStatsGrid, { ResponsiveContentGrid } from '@/components/ResponsiveGrid';
+import Loading from '@/components/Loading';
+import { useToast } from '@/components/Toast';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const { addToast } = useToast();
   
   // State for real-time data
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -91,14 +96,7 @@ export default function DashboardPage() {
   }, [user, loading, router]);
 
   if (loading || dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your workspace...</p>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen text="Loading your workspace..." />;
   }
 
   if (!user) {
@@ -189,35 +187,16 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user.email}</p>
-            </div>
-            <div className="flex space-x-3">
-              <Button onClick={() => router.push('/contracts/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Contract
-              </Button>
-              <Button variant="outline" onClick={() => router.push('/changes')}>
-                <FileText className="h-4 w-4 mr-2" />
-                Create Change
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ResponsiveHeader 
+        title="Dashboard"
+        subtitle={`Welcome back, ${user.email}`}
+        showQuickActions={true}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <ResponsiveStatsGrid className="mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Upcoming Payments</CardTitle>
@@ -265,10 +244,10 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground">Need attention</p>
             </CardContent>
           </Card>
-        </div>
+        </ResponsiveStatsGrid>
 
         {/* Main Dashboard Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <ResponsiveContentGrid>
           {/* Upcoming Payments */}
           <Card>
             <CardHeader>
@@ -410,7 +389,7 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </ResponsiveContentGrid>
       </main>
     </div>
   );
