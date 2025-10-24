@@ -8,16 +8,24 @@ export function middleware(request: NextRequest) {
   // Define public paths that don't require authentication
   const isPublicPath = path === '/login' || path === '/register' || path === '/';
 
-  // Check if the user is authenticated
-  const token = request.cookies.get('auth-token')?.value;
+  // Firebase Auth uses different cookie names - check for Firebase auth cookies
+  const firebaseAuthCookies = [
+    'firebase:authUser',
+    '__session',
+    'auth-token'
+  ];
+  
+  const hasAuthCookie = firebaseAuthCookies.some(cookieName => 
+    request.cookies.get(cookieName)?.value
+  );
 
   // If the user is not authenticated and trying to access a protected route
-  if (!isPublicPath && !token) {
+  if (!isPublicPath && !hasAuthCookie) {
     return NextResponse.redirect(new URL('/login', request.nextUrl));
   }
 
   // If the user is authenticated and trying to access login/register
-  if (isPublicPath && token) {
+  if (isPublicPath && hasAuthCookie) {
     return NextResponse.redirect(new URL('/dashboard', request.nextUrl));
   }
 
