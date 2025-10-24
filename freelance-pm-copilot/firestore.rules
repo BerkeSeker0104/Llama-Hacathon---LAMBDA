@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own data
+    match /contracts/{contractId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
+    match /plans/{planId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /changes/{changeId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /payments/{paymentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /communications/{communicationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /auditLogs/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Demo için geçici - production'da kaldırılacak
+    match /demo/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
