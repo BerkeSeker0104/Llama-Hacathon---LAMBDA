@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,8 @@ import {
   CheckCircle,
   Mail,
   Calendar,
-  User
+  User,
+  Home
 } from 'lucide-react';
 
 interface Payment {
@@ -39,6 +41,7 @@ interface Payment {
 
 export default function PaymentsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [selectedTone, setSelectedTone] = useState<'gentle' | 'neutral' | 'firm'>('neutral');
 
   // Mock data for demo
@@ -233,6 +236,10 @@ export default function PaymentsPage() {
               <p className="text-gray-600">Manage and track all your payments</p>
             </div>
             <div className="flex items-center space-x-4">
+              <Button variant="outline" onClick={() => router.push('/')}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
               <div className="flex items-center space-x-2">
                 <label className="text-sm font-medium">Reminder Tone:</label>
                 <select 

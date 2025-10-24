@@ -5,12 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, DollarSign, Calendar, Users } from 'lucide-react';
+import { FileText, DollarSign, Calendar, Users, LogOut, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Sayfa yeniden yüklenecek ve landing page gösterilecek
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   console.log('HomePage: Render - user:', user ? user.email : 'null', 'loading:', loading);
 
@@ -49,12 +58,27 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-gray-900">Freelance PM Copilot</h1>
             </div>
             <div className="flex space-x-4">
-              <Link href="/login">
-                <Button variant="outline">Sign In</Button>
-              </Link>
-              <Link href="/register">
-                <Button>Get Started</Button>
-              </Link>
+              {user ? (
+                <>
+                  <Button variant="outline" onClick={() => router.push('/dashboard')}>
+                    <Home className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                  <Button variant="outline" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="outline">Sign In</Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button>Get Started</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -72,18 +96,29 @@ export default function Home() {
             automated payment tracking, and smart change management. 
             Stop losing money to scope creep and late payments.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="text-lg px-8 py-4">
-                Start Free Trial
+          {user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-8 py-4" onClick={() => router.push('/dashboard')}>
+                Go to Dashboard
               </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4">
-                Sign In
+              <Button size="lg" variant="outline" className="text-lg px-8 py-4" onClick={handleLogout}>
+                Logout
               </Button>
-            </Link>
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register">
+                <Button size="lg" className="text-lg px-8 py-4">
+                  Start Free Trial
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-4">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Features */}

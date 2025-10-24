@@ -14,12 +14,23 @@ import {
   Plus,
   DollarSign,
   Calendar,
-  Users
+  Users,
+  LogOut,
+  Home
 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   useEffect(() => {
     console.log('Dashboard: useEffect - user:', user ? user.email : 'null', 'loading:', loading);
@@ -75,6 +86,10 @@ export default function DashboardPage() {
               <p className="text-gray-600">Welcome back, {user.email}</p>
             </div>
             <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => router.push('/')}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
               <Button onClick={() => router.push('/contracts/new')}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Contract
@@ -82,6 +97,10 @@ export default function DashboardPage() {
               <Button variant="outline" onClick={() => router.push('/changes')}>
                 <FileText className="h-4 w-4 mr-2" />
                 Create Change
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>

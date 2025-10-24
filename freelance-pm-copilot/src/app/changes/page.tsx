@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,8 @@ import {
   DollarSign,
   Calendar,
   User,
-  Mail
+  Mail,
+  Home
 } from 'lucide-react';
 
 interface ChangeRequest {
@@ -55,6 +57,7 @@ interface ChangeRequest {
 
 export default function ChangesPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [showNewForm, setShowNewForm] = useState(false);
   const [requestText, setRequestText] = useState('');
   const [selectedContract, setSelectedContract] = useState('');
@@ -251,10 +254,16 @@ export default function ChangesPage() {
               <h1 className="text-2xl font-bold text-gray-900">Change Management</h1>
               <p className="text-gray-600">Manage change requests and scope modifications</p>
             </div>
-            <Button onClick={() => setShowNewForm(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Change Request
-            </Button>
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => router.push('/')}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button onClick={() => setShowNewForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Change Request
+              </Button>
+            </div>
           </div>
         </div>
       </header>

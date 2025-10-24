@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, Home } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { storage, db } from '@/lib/firebase-client';
@@ -110,9 +110,15 @@ export default function NewContractPage() {
               <h1 className="text-2xl font-bold text-gray-900">New Contract</h1>
               <p className="text-gray-600">Upload and analyze a new contract</p>
             </div>
-            <Button variant="outline" onClick={() => router.back()}>
-              Cancel
-            </Button>
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => router.push('/')}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button variant="outline" onClick={() => router.back()}>
+                Cancel
+              </Button>
+            </div>
           </div>
         </div>
       </header>
