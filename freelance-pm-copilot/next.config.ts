@@ -2,9 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Firebase App Hosting için optimize edilmiş config
-  experimental: {
-    serverComponentsExternalPackages: ['firebase-admin']
-  },
+  serverExternalPackages: ['firebase-admin'],
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

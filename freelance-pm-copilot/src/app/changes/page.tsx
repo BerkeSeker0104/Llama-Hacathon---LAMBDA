@@ -312,7 +312,9 @@ export default function ChangesPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(change.status)}
-                    <h3 className="font-medium">{change.contractTitle}</h3>
+                    <h3 className="font-medium">
+                      {contracts.find(c => c.id === change.contractId)?.title || 'Unknown Contract'}
+                    </h3>
                   </div>
                   <div className="flex space-x-2">
                     {getStatusBadge(change.status)}
