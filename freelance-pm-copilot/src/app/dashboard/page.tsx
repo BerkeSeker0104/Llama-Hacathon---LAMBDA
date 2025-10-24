@@ -22,7 +22,9 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('Dashboard: useEffect - user:', user ? user.email : 'null', 'loading:', loading);
     if (!loading && !user) {
+      console.log('Dashboard: Redirecting to login - no user found');
       router.push('/login');
     }
   }, [user, loading, router]);

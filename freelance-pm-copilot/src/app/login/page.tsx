@@ -23,9 +23,12 @@ export default function LoginPage() {
     setError('');
 
     try {
+      console.log('Login: Attempting to sign in with email:', email);
       await signIn(email, password);
+      console.log('Login: Sign in successful, redirecting to dashboard');
       router.push('/dashboard');
     } catch (error: any) {
+      console.error('Login: Sign in error:', error);
       setError(error.message || 'Failed to sign in');
     } finally {
       setLoading(false);
