@@ -15,8 +15,7 @@ import {
   DollarSign,
   Calendar,
   Users,
-  LogOut,
-  Home
+  LogOut
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -86,10 +85,6 @@ export default function DashboardPage() {
               <p className="text-gray-600">Welcome back, {user.email}</p>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => router.push('/')}>
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
               <Button onClick={() => router.push('/contracts/new')}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Contract

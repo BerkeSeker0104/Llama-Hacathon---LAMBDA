@@ -14,8 +14,7 @@ import {
   CheckCircle,
   Mail,
   Calendar,
-  User,
-  Home
+  User
 } from 'lucide-react';
 
 interface Payment {
@@ -236,10 +235,6 @@ export default function PaymentsPage() {
               <p className="text-gray-600">Manage and track all your payments</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" onClick={() => router.push('/')}>
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
               <div className="flex items-center space-x-2">
                 <label className="text-sm font-medium">Reminder Tone:</label>
                 <select 

@@ -19,8 +19,7 @@ import {
   DollarSign,
   Calendar,
   User,
-  Mail,
-  Home
+  Mail
 } from 'lucide-react';
 
 interface ChangeRequest {
@@ -254,16 +253,10 @@ export default function ChangesPage() {
               <h1 className="text-2xl font-bold text-gray-900">Change Management</h1>
               <p className="text-gray-600">Manage change requests and scope modifications</p>
             </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => router.push('/')}>
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
-              <Button onClick={() => setShowNewForm(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Change Request
-              </Button>
-            </div>
+            <Button onClick={() => setShowNewForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Change Request
+            </Button>
           </div>
         </div>
       </header>
