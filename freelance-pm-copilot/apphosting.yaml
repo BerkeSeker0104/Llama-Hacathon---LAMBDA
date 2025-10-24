@@ -1,0 +1,17 @@
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyDWktZjXxHt-Rx8HSfSphWgLpEa9DmVnb8"
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "lambda-926aa.firebaseapp.com"
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "lambda-926aa"
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "lambda-926aa.firebasestorage.app"
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "1061268013673"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:1061268013673:web:6f2f97c602ad77f14658f8"
+  - variable: RESEND_API_KEY
+    value: "demo-key"
+  - variable: RESEND_FROM_EMAIL
+    value: "noreply@freelancepm.com"
