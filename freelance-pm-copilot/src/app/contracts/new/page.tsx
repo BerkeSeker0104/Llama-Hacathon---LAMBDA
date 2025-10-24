@@ -7,97 +7,101 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc } from 'firebase/firestore';
-import { storage, db } from '@/lib/firebase-client';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { ContractService } from '@/lib/firestore-service';
+import PDFUpload from '@/components/PDFUpload';
 
 export default function NewContractPage() {
-  const [file, setFile] = useState<File | null>(null);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [contractTitle, setContractTitle] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'complete' | 'error'>('idle');
   const [error, setError] = useState('');
+  const [contractId, setContractId] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') {
-        setError('Please select a PDF file');
-        return;
-      }
-      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
-        setError('File size must be less than 10MB');
-        return;
-      }
-      setFile(selectedFile);
+  const handleCreateContract = async () => {
+    if (!user || !contractTitle || !clientName || !clientEmail) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setStatus('uploading');
       setError('');
+
+      // Create contract in Firestore
+      const contractId = await ContractService.createContract({
+        title: contractTitle,
+        clientName,
+        clientEmail,
+        userId: user.uid,
+        status: 'analyzing'
+      });
+
+      setContractId(contractId);
+      setStatus('idle');
+    } catch (error: any) {
+      console.error('Error creating contract:', error);
+      setError(error.message || 'Failed to create contract');
+      setStatus('error');
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !user) return;
-
-    setUploading(true);
-    setStatus('uploading');
-    setError('');
+  const handlePDFUploadComplete = async (result: { url: string; path: string; size: number }) => {
+    if (!contractId || !user) return;
 
     try {
-      // Create contract document in Firestore
-      const contractId = `contract_${Date.now()}`;
-      const contractRef = doc(db, 'contracts', contractId);
-      
-      // Upload file to Firebase Storage
-      const storageRef = ref(storage, `contracts/${user.uid}/${contractId}.pdf`);
-      const uploadTask = uploadBytes(storageRef, file);
-      
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
+      setStatus('analyzing');
+      setPdfUrl(result.url);
 
-      await uploadTask;
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      // Get download URL
-      const downloadURL = await getDownloadURL(storageRef);
-
-      // Save contract metadata to Firestore
-      await setDoc(contractRef, {
-        id: contractId,
-        title: contractTitle || file.name,
-        clientName,
-        clientEmail,
-        uploadedAt: new Date(),
-        pdfUrl: downloadURL,
-        status: 'analyzing',
-        userId: user.uid,
-        createdAt: new Date(),
+      // Update contract with PDF URL
+      await ContractService.updateContract(contractId, {
+        pdfUrl: result.url,
+        status: 'analyzing'
       });
 
-      setStatus('analyzing');
-      
-      // Simulate AI analysis (in real app, this would be handled by Cloud Function)
-      setTimeout(() => {
-        setStatus('complete');
-        // Redirect to contract detail page
-        router.push(`/contracts/${contractId}`);
-      }, 3000);
+      // Trigger AI analysis
+      try {
+        const response = await fetch('/api/contracts/trigger-analysis', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contractId,
+            pdfUrl: result.url
+          }),
+        });
+
+        if (response.ok) {
+          // Simulate analysis time (in real app, this would be handled by Cloud Function)
+          setTimeout(() => {
+            setStatus('complete');
+            // Redirect to contract detail page
+            router.push(`/contracts/${contractId}`);
+          }, 3000);
+        } else {
+          throw new Error('Failed to trigger AI analysis');
+        }
+      } catch (error) {
+        console.error('Error triggering AI analysis:', error);
+        setError('Failed to start AI analysis');
+        setStatus('error');
+      }
 
     } catch (error: any) {
-      console.error('Upload error:', error);
-      setError(error.message || 'Failed to upload contract');
+      console.error('Error updating contract:', error);
+      setError(error.message || 'Failed to update contract');
       setStatus('error');
-    } finally {
-      setUploading(false);
     }
+  };
+
+  const handlePDFUploadError = (error: string) => {
+    setError(error);
+    setStatus('error');
   };
 
   return (
@@ -128,91 +132,73 @@ export default function NewContractPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* File Upload */}
-              <div className="space-y-2">
-                <Label htmlFor="contract-file">Contract PDF</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                  <input
-                    id="contract-file"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                  <label htmlFor="contract-file" className="cursor-pointer">
-                    {file ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <FileText className="h-8 w-8 text-blue-600" />
-                        <span className="text-sm font-medium">{file.name}</span>
-                      </div>
+            <div className="space-y-6">
+              {/* Contract Details Form */}
+              {!contractId && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="contract-title">Contract Title *</Label>
+                      <Input
+                        id="contract-title"
+                        value={contractTitle}
+                        onChange={(e) => setContractTitle(e.target.value)}
+                        placeholder="e.g., Website Development Project"
+                        disabled={status === 'uploading'}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="client-name">Client Name *</Label>
+                      <Input
+                        id="client-name"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        placeholder="e.g., Acme Corporation"
+                        disabled={status === 'uploading'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="client-email">Client Email *</Label>
+                    <Input
+                      id="client-email"
+                      type="email"
+                      value={clientEmail}
+                      onChange={(e) => setClientEmail(e.target.value)}
+                      placeholder="client@company.com"
+                      disabled={status === 'uploading'}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleCreateContract}
+                    disabled={!contractTitle || !clientName || !clientEmail || status === 'uploading'}
+                    className="w-full"
+                  >
+                    {status === 'uploading' ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating Contract...
+                      </>
                     ) : (
-                      <div className="flex flex-col items-center space-y-2">
-                        <Upload className="h-12 w-12 text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium">Click to upload PDF</p>
-                          <p className="text-xs text-gray-500">or drag and drop</p>
-                        </div>
-                      </div>
+                      'Create Contract'
                     )}
-                  </label>
+                  </Button>
                 </div>
-                {error && (
-                  <div className="flex items-center space-x-2 text-red-600 text-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>{error}</span>
-                  </div>
-                )}
-              </div>
+              )}
 
-              {/* Contract Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contract-title">Contract Title</Label>
-                  <Input
-                    id="contract-title"
-                    value={contractTitle}
-                    onChange={(e) => setContractTitle(e.target.value)}
-                    placeholder="e.g., Website Development Project"
-                    disabled={uploading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="client-name">Client Name</Label>
-                  <Input
-                    id="client-name"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    placeholder="e.g., Acme Corporation"
-                    disabled={uploading}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="client-email">Client Email</Label>
-                <Input
-                  id="client-email"
-                  type="email"
-                  value={clientEmail}
-                  onChange={(e) => setClientEmail(e.target.value)}
-                  placeholder="client@company.com"
-                  disabled={uploading}
-                />
-              </div>
-
-              {/* Upload Progress */}
-              {status === 'uploading' && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Uploading...</span>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
+              {/* PDF Upload */}
+              {contractId && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Contract PDF</Label>
+                    <PDFUpload
+                      contractId={contractId}
+                      onUploadComplete={handlePDFUploadComplete}
+                      onUploadError={handlePDFUploadError}
+                      existingUrl={pdfUrl || undefined}
+                      disabled={status === 'analyzing' || status === 'complete'}
                     />
                   </div>
                 </div>
@@ -221,7 +207,7 @@ export default function NewContractPage() {
               {/* Analysis Status */}
               {status === 'analyzing' && (
                 <div className="flex items-center justify-center space-x-2 p-4 bg-blue-50 rounded-lg">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                   <span className="text-blue-600 font-medium">AI is analyzing your contract...</span>
                 </div>
               )}
@@ -233,15 +219,14 @@ export default function NewContractPage() {
                 </div>
               )}
 
-              {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={!file || uploading || status === 'analyzing'}
-              >
-                {uploading ? 'Uploading...' : status === 'analyzing' ? 'Analyzing...' : 'Upload & Analyze'}
-              </Button>
-            </form>
+              {/* Error Display */}
+              {error && (
+                <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-sm text-red-700">{error}</span>
+                </div>
+              )}
+            </div>
 
             {/* What happens next */}
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">
