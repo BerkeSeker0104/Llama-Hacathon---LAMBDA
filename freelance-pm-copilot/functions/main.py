@@ -5,12 +5,28 @@ from firebase_functions import https_fn, firestore_fn
 from firebase_admin import initialize_app, firestore, storage
 import requests
 
-# Initialize Firebase Admin
+# Initialize Firebase Admin with explicit configuration
 try:
-    initialize_app(options={'storageBucket': 'lambda-926aa.firebasestorage.app'})
-except ValueError:
-    # App already initialized
-    pass
+    # Force reinitialize with correct storage bucket
+    from firebase_admin import delete_app, get_app
+    try:
+        delete_app()
+    except:
+        pass
+    
+    initialize_app(options={
+        'storageBucket': 'lambda-926aa.firebasestorage.app',
+        'projectId': 'lambda-926aa'
+    })
+    print("Firebase Admin initialized with storageBucket: lambda-926aa.firebasestorage.app")
+except ValueError as e:
+    print(f"Firebase Admin already initialized: {e}")
+    # Try to get existing app and verify bucket
+    try:
+        app = get_app()
+        print(f"Using existing Firebase app: {app.name}")
+    except:
+        pass
 
 @https_fn.on_request()
 def analyzeContract(req: https_fn.Request) -> https_fn.Response:

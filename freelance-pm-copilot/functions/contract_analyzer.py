@@ -17,6 +17,10 @@ llama_api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
 db = firestore.client()
 bucket = storage.bucket()
 
+# Verify bucket configuration
+print(f"Firebase Storage bucket name: {bucket.name}")
+print(f"Firebase Storage bucket path: {bucket.path}")
+
 SYSTEM_PROMPT = """
 Sen, freelancer sözleşmeleri konusunda uzman bir hukuk asistanısın.
 Görevin, sana verilen sözleşme metnini analiz etmek ve SADECE ve SADECE 
