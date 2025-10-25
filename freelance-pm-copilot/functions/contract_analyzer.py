@@ -79,13 +79,16 @@ def download_pdf_from_storage(pdf_url):
         # Parse the URL to get the file path
         from urllib.parse import urlparse, unquote
         parsed_url = urlparse(pdf_url)
-        path_parts = parsed_url.path.split('/')
-        
-        if len(path_parts) < 4:
+
+        # Firebase download URLs look like:
+        # https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encoded_path>?alt=media&token=...
+        # We only need the encoded object path that comes after `/o/`.
+        path_after_object_marker = parsed_url.path.split('/o/')
+        if len(path_after_object_marker) != 2 or not path_after_object_marker[1]:
             raise ValueError("Invalid Firebase Storage URL format")
-        
-        # Get the file path (everything after /o/)
-        file_path = unquote(path_parts[3])
+
+        # Decode the object path so it can be used with the Storage SDK
+        file_path = unquote(path_after_object_marker[1])
         
         # Download the file
         blob = bucket.blob(file_path)

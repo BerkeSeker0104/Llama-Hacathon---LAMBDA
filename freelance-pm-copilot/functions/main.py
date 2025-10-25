@@ -5,13 +5,12 @@ from firebase_functions import https_fn, firestore_fn
 from firebase_admin import initialize_app, firestore, storage
 import requests
 
-# Initialize Firebase Admin (only when needed)
-def get_firestore_client():
-    try:
-        return firestore.client()
-    except:
-        initialize_app()
-        return firestore.client()
+# Initialize Firebase Admin
+try:
+    initialize_app()
+except ValueError:
+    # App already initialized
+    pass
 
 @https_fn.on_request()
 def analyzeContract(req: https_fn.Request) -> https_fn.Response:
