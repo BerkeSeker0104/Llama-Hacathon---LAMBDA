@@ -9,7 +9,8 @@ import {
   Bell, 
   User,
   Plus,
-  Search
+  Search,
+  LogOut
 } from 'lucide-react';
 import MobileNavigation from './MobileNavigation';
 
@@ -27,7 +28,16 @@ export default function ResponsiveHeader({
   className = ''
 }: ResponsiveHeaderProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <header className={`bg-white shadow-sm border-b ${className}`}>
@@ -105,6 +115,17 @@ export default function ResponsiveHeader({
                   </p>
                 </div>
               </div>
+              
+              {/* Logout Button */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-red-600"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="sr-only">Logout</span>
+              </Button>
             </div>
           </div>
         </div>
