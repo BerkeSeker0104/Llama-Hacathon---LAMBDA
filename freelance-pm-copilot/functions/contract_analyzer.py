@@ -86,9 +86,9 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
                 from urllib.parse import urlparse, unquote
                 parsed_url = urlparse(pdf_url)
                 path_parts = parsed_url.path.split('/')
-                if len(path_parts) >= 4 and path_parts[1] == "v0" and path_parts[2] == "b":
+                if len(path_parts) >= 6 and path_parts[1] == "v0" and path_parts[2] == "b" and path_parts[4] == "o":
                     # Extract the file path after /o/
-                    object_path = unquote(path_parts[4]) if len(path_parts) > 4 else None
+                    object_path = unquote(path_parts[5]) if len(path_parts) > 5 else None
             else:
                 object_path = extract_storage_path_from_url(pdf_url)
 
