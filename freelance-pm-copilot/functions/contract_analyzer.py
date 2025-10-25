@@ -11,7 +11,7 @@ load_dotenv()
 
 # Initialize clients
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-llama_api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
+llama_api_key = os.environ.get("LLAMA_API_KEY")
 
 # Initialize Firebase clients
 db = firestore.client()
