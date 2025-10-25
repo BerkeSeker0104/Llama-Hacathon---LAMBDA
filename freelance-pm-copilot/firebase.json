@@ -13,10 +13,13 @@
       }
     ]
   },
-  "functions": {
-    "source": ".",
-    "runtime": "nodejs18"
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "python312"
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"

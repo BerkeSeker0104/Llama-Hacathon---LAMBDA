@@ -150,6 +150,8 @@ export interface Plan {
 export interface Sprint {
   id: string;
   name: string;
+  sprint_num: number;
+  sprint_hedefi: string;
   startDate: string;
   endDate: string;
   tasks: Task[];
@@ -166,6 +168,8 @@ export interface Task {
   actualHours?: number;
   dueDate?: string;
   completedAt?: Date;
+  // AI-generated task properties
+  gorev_aciklamasi?: string; // Task description from AI
 }
 
 // Firestore Collection Names

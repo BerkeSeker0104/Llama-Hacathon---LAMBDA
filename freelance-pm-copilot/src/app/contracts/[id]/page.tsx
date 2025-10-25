@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ContractService } from '@/lib/firestore-service';
 import { Contract, ContractAnalysis } from '@/lib/firestore-schema';
+import SprintPlanView from '@/components/SprintPlanView';
 
 // Using Contract interface from firestore-schema
 
@@ -209,11 +210,12 @@ export default function ContractDetailPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="scope">Scope & Deliverables</TabsTrigger>
             <TabsTrigger value="milestones">Milestones & Payments</TabsTrigger>
             <TabsTrigger value="risks">Risks & Gaps</TabsTrigger>
+            <TabsTrigger value="sprint-plan">Sprint Plan</TabsTrigger>
             <TabsTrigger value="changes">Changes</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
           </TabsList>
@@ -378,6 +380,17 @@ export default function ContractDetailPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Sprint Plan Tab */}
+          <TabsContent value="sprint-plan" className="space-y-6">
+            <SprintPlanView 
+              contractId={contractId}
+              onPlanGenerated={(planId) => {
+                console.log('Sprint plan generated:', planId);
+                // Optionally refresh contract data or show success message
+              }}
+            />
           </TabsContent>
 
           {/* Changes Tab */}
