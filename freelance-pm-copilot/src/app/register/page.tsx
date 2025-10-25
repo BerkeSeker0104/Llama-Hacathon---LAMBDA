@@ -24,13 +24,13 @@ export default function RegisterPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Şifreler eşleşmiyor');
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Şifre en az 6 karakter olmalı');
       setLoading(false);
       return;
     }
@@ -39,7 +39,7 @@ export default function RegisterPage() {
       await signUp(email, password);
       router.push('/dashboard');
     } catch (error: any) {
-      setError(error.message || 'Failed to create account');
+      setError(error.message || 'Hesap oluşturulamadı');
     } finally {
       setLoading(false);
     }
@@ -49,15 +49,15 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create Account</CardTitle>
+          <CardTitle>Hesap Oluştur</CardTitle>
           <CardDescription>
-            Sign up for your Freelance PM Copilot workspace
+            Serbest PM Asistanı çalışma alanınız için kayıt olun
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-posta</Label>
               <Input
                 id="email"
                 type="email"
@@ -67,7 +67,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Şifre</Label>
               <Input
                 id="password"
                 type="password"
@@ -77,7 +77,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Şifreyi Onayla</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -90,14 +90,14 @@ export default function RegisterPage() {
               <div className="text-red-500 text-sm">{error}</div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
             </Button>
           </form>
           <div className="mt-4 text-center">
             <span className="text-sm text-gray-600">
-              Already have an account?{' '}
+              Zaten hesabınız var mı?{' '}
               <Link href="/login" className="text-blue-600 hover:underline">
-                Sign in
+                Giriş yap
               </Link>
             </span>
           </div>

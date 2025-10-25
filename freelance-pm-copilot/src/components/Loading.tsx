@@ -20,7 +20,7 @@ interface LoadingProps {
 
 export default function Loading({ 
   size = 'md', 
-  text = 'Loading...', 
+  text = 'Yükleniyor...', 
   fullScreen = false,
   className = ''
 }: LoadingProps) {
@@ -49,11 +49,11 @@ export function LoadingSpinner({ size = 'sm', className = '' }: { size?: Loading
   return <Loader2 className={`animate-spin text-blue-600 ${sizeClasses[size]} ${className}`} />;
 }
 
-export function LoadingPage({ text = 'Loading...' }: { text?: string }) {
+export function LoadingPage({ text = 'Yükleniyor...' }: { text?: string }) {
   return <Loading size="lg" text={text} fullScreen />;
 }
 
-export function LoadingCard({ text = 'Loading...' }: { text?: string }) {
+export function LoadingCard({ text = 'Yükleniyor...' }: { text?: string }) {
   return (
     <div className="p-8">
       <Loading size="md" text={text} />

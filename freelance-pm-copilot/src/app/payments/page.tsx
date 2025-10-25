@@ -124,7 +124,7 @@ export default function PaymentsPage() {
     // In real app, this would call the API to send email
     console.log('Sending reminder for payment:', payment.id, 'with tone:', selectedTone);
     // Show success message
-    alert(`Reminder sent to ${payment.clientName} with ${selectedTone} tone`);
+    alert(`${selectedTone} tonla ${payment.clientName} adlı müşteriye hatırlatma gönderildi`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -171,10 +171,10 @@ export default function PaymentsPage() {
           </div>
           <div className="flex items-center text-sm text-gray-600">
             <Calendar className="h-4 w-4 mr-2" />
-            Due: {payment.dueDate}
+            Vade: {payment.dueDate}
             {payment.daysOverdue && (
               <span className="ml-2 text-red-600 font-medium">
-                ({payment.daysOverdue} days overdue)
+                ({payment.daysOverdue} gün gecikmiş)
               </span>
             )}
           </div>
@@ -192,7 +192,7 @@ export default function PaymentsPage() {
                 onClick={() => handleSendReminder(payment)}
               >
                 <Mail className="h-4 w-4 mr-1" />
-                Send Reminder
+                Hatırlatma Gönder
               </Button>
             </div>
           )}
@@ -201,7 +201,7 @@ export default function PaymentsPage() {
         {payment.remindersSent.length > 0 && (
           <div className="mt-4 pt-4 border-t">
             <p className="text-sm text-gray-600 mb-2">
-              Reminders sent: {payment.remindersSent.length}
+              Gönderilen hatırlatmalar: {payment.remindersSent.length}
             </p>
             <div className="flex space-x-1">
               {payment.remindersSent.map((reminder, index) => (
@@ -216,7 +216,7 @@ export default function PaymentsPage() {
         {payment.paidAt && (
           <div className="mt-4 pt-4 border-t">
             <p className="text-sm text-green-600">
-              ✓ Paid on {payment.paidAt}
+              ✓ {payment.paidAt} tarihinde ödendi
             </p>
           </div>
         )}
@@ -231,20 +231,20 @@ export default function PaymentsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Payment Tracking</h1>
-              <p className="text-gray-600">Manage and track all your payments</p>
+            <h1 className="text-2xl font-bold text-gray-900">Ödeme Takibi</h1>
+            <p className="text-gray-600">Tüm ödemelerinizi yönetin ve takip edin</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium">Reminder Tone:</label>
+                <label className="text-sm font-medium">Hatırlatma Tonu:</label>
                 <select 
                   value={selectedTone} 
                   onChange={(e) => setSelectedTone(e.target.value as any)}
                   className="border rounded px-2 py-1 text-sm"
                 >
-                  <option value="gentle">Gentle</option>
-                  <option value="neutral">Neutral</option>
-                  <option value="firm">Firm</option>
+                  <option value="gentle">Nazik</option>
+                  <option value="neutral">Nötr</option>
+                  <option value="firm">Sert</option>
                 </select>
               </div>
             </div>
@@ -257,13 +257,13 @@ export default function PaymentsPage() {
         <Tabs defaultValue="upcoming" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upcoming">
-              Upcoming ({upcomingPayments.length})
+              Yaklaşan ({upcomingPayments.length})
             </TabsTrigger>
             <TabsTrigger value="overdue">
-              Overdue ({overduePayments.length})
+              Geciken ({overduePayments.length})
             </TabsTrigger>
             <TabsTrigger value="paid">
-              Paid ({paidPayments.length})
+              Ödenen ({paidPayments.length})
             </TabsTrigger>
           </TabsList>
 
@@ -278,8 +278,8 @@ export default function PaymentsPage() {
               <Card>
                 <CardContent className="p-8 text-center">
                   <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-medium mb-2">No upcoming payments</h3>
-                  <p className="text-gray-600">All caught up! No payments due in the next 7 days.</p>
+                  <h3 className="text-lg font-medium mb-2">Yaklaşan ödeme yok</h3>
+                  <p className="text-gray-600">Her şey güncel! Önümüzdeki 7 gün içinde vadesi gelen ödeme yok.</p>
                 </CardContent>
               </Card>
             )}
@@ -296,8 +296,8 @@ export default function PaymentsPage() {
               <Card>
                 <CardContent className="p-8 text-center">
                   <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <h3 className="text-lg font-medium mb-2">No overdue payments</h3>
-                  <p className="text-gray-600">Great job! All payments are up to date.</p>
+                  <h3 className="text-lg font-medium mb-2">Geciken ödeme yok</h3>
+                  <p className="text-gray-600">Harika iş! Tüm ödemeler güncel.</p>
                 </CardContent>
               </Card>
             )}
@@ -314,8 +314,8 @@ export default function PaymentsPage() {
               <Card>
                 <CardContent className="p-8 text-center">
                   <DollarSign className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-medium mb-2">No paid payments yet</h3>
-                  <p className="text-gray-600">Payments will appear here once they're marked as paid.</p>
+                  <h3 className="text-lg font-medium mb-2">Henüz ödenen ödeme yok</h3>
+                  <p className="text-gray-600">Ödemeler ödenmiş olarak işaretlendiklerinde burada görünecek.</p>
                 </CardContent>
               </Card>
             )}
@@ -328,7 +328,7 @@ export default function PaymentsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Outstanding</p>
+                  <p className="text-sm font-medium text-gray-600">Toplam Bekleyen</p>
                   <p className="text-2xl font-bold">
                     ${(upcomingPayments.reduce((sum, p) => sum + p.amount, 0) + 
                        overduePayments.reduce((sum, p) => sum + p.amount, 0)).toLocaleString()}
@@ -343,7 +343,7 @@ export default function PaymentsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Overdue Amount</p>
+                  <p className="text-sm font-medium text-gray-600">Geciken Tutar</p>
                   <p className="text-2xl font-bold text-red-600">
                     ${overduePayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()}
                   </p>
@@ -357,7 +357,7 @@ export default function PaymentsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Paid</p>
+                  <p className="text-sm font-medium text-gray-600">Toplam Ödenen</p>
                   <p className="text-2xl font-bold text-green-600">
                     ${paidPayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()}
                   </p>
@@ -371,7 +371,7 @@ export default function PaymentsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Payment Rate</p>
+                  <p className="text-sm font-medium text-gray-600">Ödeme Oranı</p>
                   <p className="text-2xl font-bold">
                     {payments.length > 0 ? Math.round((paidPayments.length / payments.length) * 100) : 0}%
                   </p>

@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const { paymentId, tone, clientEmail, clientName, amount, currency, dueDate, milestone } = body;
 
     if (!paymentId || !tone || !clientEmail || !clientName || !amount || !currency || !dueDate || !milestone) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
     // Find the appropriate email template
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 400 });
+      return NextResponse.json({ error: 'Şablon bulunamadı' }, { status: 400 });
     }
 
     // Generate email content
@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Reminder sent successfully',
+      message: 'Hatırlatma başarıyla gönderildi',
       emailId: emailResult.id 
     });
   } catch (error) {
     console.error('Error sending reminder:', error);
-    return NextResponse.json({ error: 'Failed to send reminder' }, { status: 500 });
+    return NextResponse.json({ error: 'Hatırlatma gönderilemedi' }, { status: 500 });
   }
 }

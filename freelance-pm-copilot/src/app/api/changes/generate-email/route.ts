@@ -7,14 +7,14 @@ export async function POST(request: NextRequest) {
     const { changeRequest, analysis, selectedOption, clientName, contractTitle } = body;
 
     if (!changeRequest || !analysis || !selectedOption || !clientName || !contractTitle) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
     // Find the change order template
     const template = emailTemplates.find(t => t.type === 'change_order');
     
     if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 400 });
+      return NextResponse.json({ error: 'Şablon bulunamadı' }, { status: 400 });
     }
 
     // Generate email content
@@ -38,6 +38,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error generating email:', error);
-    return NextResponse.json({ error: 'Failed to generate email' }, { status: 500 });
+    return NextResponse.json({ error: 'E-posta oluşturulamadı' }, { status: 500 });
   }
 }

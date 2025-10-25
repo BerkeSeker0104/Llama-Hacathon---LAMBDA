@@ -30,17 +30,17 @@ export function generateChangeOrderPDF(data: ChangeOrderData): jsPDF {
   
   // Header
   doc.setFontSize(20);
-  doc.text('Change Order Proposal', 20, 30);
+  doc.text('Değişiklik Emri Teklifi', 20, 30);
   
   // Contract info
   doc.setFontSize(12);
-  doc.text(`Contract: ${data.contractTitle}`, 20, 50);
-  doc.text(`Client: ${data.clientName}`, 20, 60);
-  doc.text(`Date: ${data.date}`, 20, 70);
+  doc.text(`Sözleşme: ${data.contractTitle}`, 20, 50);
+  doc.text(`Müşteri: ${data.clientName}`, 20, 60);
+  doc.text(`Tarih: ${data.date}`, 20, 70);
   
   // Request details
   doc.setFontSize(14);
-  doc.text('Change Request:', 20, 90);
+  doc.text('Değişiklik Talebi:', 20, 90);
   doc.setFontSize(10);
   const requestLines = doc.splitTextToSize(data.requestText, 170);
   doc.text(requestLines, 20, 100);

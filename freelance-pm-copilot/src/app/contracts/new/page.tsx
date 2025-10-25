@@ -27,7 +27,7 @@ export default function NewContractPage() {
 
   const handleCreateContract = async () => {
     if (!user || !contractTitle || !clientName || !clientEmail) {
-      setError('Please fill in all required fields');
+      setError('Lütfen tüm gerekli alanları doldurun');
       return;
     }
 
@@ -48,8 +48,8 @@ export default function NewContractPage() {
       setStatus('idle');
       addToast({
         type: 'success',
-        title: 'Contract created successfully!',
-        description: 'You can now upload the PDF file.'
+        title: 'Sözleşme başarıyla oluşturuldu!',
+        description: 'Artık PDF dosyasını yükleyebilirsiniz.'
       });
     } catch (error) {
       console.error('Error creating contract:', error);
@@ -58,7 +58,7 @@ export default function NewContractPage() {
       setStatus('error');
       addToast({
         type: 'error',
-        title: 'Failed to create contract',
+        title: 'Sözleşme oluşturulamadı',
         description: message
       });
     }
@@ -102,7 +102,7 @@ export default function NewContractPage() {
         }
       } catch (error) {
         console.error('Error triggering AI analysis:', error);
-        setError('Failed to start AI analysis');
+        setError('Yapay zeka analizi başlatılamadı');
         setStatus('error');
       }
 
@@ -123,8 +123,8 @@ export default function NewContractPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <ResponsiveHeader 
-        title="New Contract"
-        subtitle="Upload and analyze a new contract"
+        title="Yeni Sözleşme"
+        subtitle="Yeni bir sözleşme yükleyin ve analiz edin"
         showQuickActions={false}
       />
 
@@ -132,10 +132,10 @@ export default function NewContractPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Contract Upload & Analysis</CardTitle>
+            <CardTitle>Sözleşme Yükleme ve Analiz</CardTitle>
             <CardDescription>
-              Upload your contract PDF and our AI will analyze it to extract deliverables, 
-              milestones, payment terms, and potential risks.
+              Sözleşme PDF'inizi yükleyin ve yapay zekamız teslim edilebilirler, 
+              kilometre taşları, ödeme koşulları ve potansiyel riskleri çıkarmak için analiz edecek.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -145,35 +145,35 @@ export default function NewContractPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="contract-title">Contract Title *</Label>
+                      <Label htmlFor="contract-title">Sözleşme Başlığı *</Label>
                       <Input
                         id="contract-title"
                         value={contractTitle}
                         onChange={(e) => setContractTitle(e.target.value)}
-                        placeholder="e.g., Website Development Project"
+                        placeholder="örn., Web Sitesi Geliştirme Projesi"
                         disabled={status === 'uploading'}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="client-name">Client Name *</Label>
+                      <Label htmlFor="client-name">Müşteri Adı *</Label>
                       <Input
                         id="client-name"
                         value={clientName}
                         onChange={(e) => setClientName(e.target.value)}
-                        placeholder="e.g., Acme Corporation"
+                        placeholder="örn., Acme Şirketi"
                         disabled={status === 'uploading'}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="client-email">Client Email *</Label>
+                    <Label htmlFor="client-email">Müşteri E-postası *</Label>
                     <Input
                       id="client-email"
                       type="email"
                       value={clientEmail}
                       onChange={(e) => setClientEmail(e.target.value)}
-                      placeholder="client@company.com"
+                      placeholder="musteri@sirket.com"
                       disabled={status === 'uploading'}
                     />
                   </div>
@@ -186,10 +186,10 @@ export default function NewContractPage() {
                     {status === 'uploading' ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating Contract...
+                        Sözleşme Oluşturuluyor...
                       </>
                     ) : (
-                      'Create Contract'
+                      'Sözleşme Oluştur'
                     )}
                   </Button>
                 </div>
@@ -199,7 +199,7 @@ export default function NewContractPage() {
               {contractId && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Contract PDF</Label>
+                    <Label>Sözleşme PDF'i</Label>
                     <PDFUpload
                       contractId={contractId}
                       onUploadComplete={handlePDFUploadComplete}
@@ -215,14 +215,14 @@ export default function NewContractPage() {
               {status === 'analyzing' && (
                 <div className="flex items-center justify-center space-x-2 p-4 bg-blue-50 rounded-lg">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                  <span className="text-blue-600 font-medium">AI is analyzing your contract...</span>
+                  <span className="text-blue-600 font-medium">Yapay zeka sözleşmenizi analiz ediyor...</span>
                 </div>
               )}
 
               {status === 'complete' && (
                 <div className="flex items-center justify-center space-x-2 p-4 bg-green-50 rounded-lg">
                   <CheckCircle className="h-6 w-6 text-green-600" />
-                  <span className="text-green-600 font-medium">Analysis complete!</span>
+                  <span className="text-green-600 font-medium">Analiz tamamlandı!</span>
                 </div>
               )}
 
@@ -237,12 +237,12 @@ export default function NewContractPage() {
 
             {/* What happens next */}
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-medium mb-2">What happens next?</h3>
+              <h3 className="font-medium mb-2">Sırada ne var?</h3>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• AI extracts deliverables, milestones, and payment terms</li>
-                <li>• Identifies potential risks and scope gaps</li>
-                <li>• Creates a structured project plan</li>
-                <li>• Sets up payment tracking and reminders</li>
+                <li>• Yapay zeka teslim edilebilirler, kilometre taşları ve ödeme koşullarını çıkarır</li>
+                <li>• Potansiyel riskleri ve kapsam boşluklarını tespit eder</li>
+                <li>• Yapılandırılmış bir proje planı oluşturur</li>
+                <li>• Ödeme takibi ve hatırlatmaları kurar</li>
               </ul>
             </div>
           </CardContent>

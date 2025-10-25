@@ -96,7 +96,7 @@ export default function DashboardPage() {
   }, [user, loading, router]);
 
   if (loading || dataLoading) {
-    return <Loading fullScreen text="Loading your workspace..." />;
+    return <Loading fullScreen text="Çalışma alanınız yükleniyor..." />;
   }
 
   if (!user) {
@@ -188,8 +188,8 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <ResponsiveHeader 
-        title="Dashboard"
-        subtitle={`Welcome back, ${user.email}`}
+        title="Pano"
+        subtitle={`Tekrar hoş geldiniz, ${user.email}`}
         showQuickActions={true}
       />
 
@@ -199,49 +199,49 @@ export default function DashboardPage() {
         <ResponsiveStatsGrid className="mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Upcoming Payments</CardTitle>
+              <CardTitle className="text-sm font-medium">Yaklaşan Ödemeler</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingPayments.length}</div>
-              <p className="text-xs text-muted-foreground">
-                ${upcomingPayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} total
+                <p className="text-xs text-muted-foreground">
+                ${upcomingPayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} toplam
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Payments</CardTitle>
+              <CardTitle className="text-sm font-medium">Geciken Ödemeler</CardTitle>
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{overduePayments.length}</div>
-              <p className="text-xs text-muted-foreground">
-                ${overduePayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} overdue
+                <p className="text-xs text-muted-foreground">
+                ${overduePayments.reduce((sum, p) => sum + p.amount, 0).toLocaleString()} gecikmiş
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Contracts</CardTitle>
+              <CardTitle className="text-sm font-medium">Aktif Sözleşmeler</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{activeContracts}</div>
-              <p className="text-xs text-muted-foreground">Currently active</p>
+              <p className="text-xs text-muted-foreground">Şu anda aktif</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Risk Items</CardTitle>
+              <CardTitle className="text-sm font-medium">Risk Öğeleri</CardTitle>
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{riskItems.length}</div>
-              <p className="text-xs text-muted-foreground">Need attention</p>
+              <p className="text-xs text-muted-foreground">Dikkat gerekiyor</p>
             </CardContent>
           </Card>
         </ResponsiveStatsGrid>
@@ -253,9 +253,9 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Clock className="h-5 w-5 mr-2" />
-                Upcoming Payments
+                Yaklaşan Ödemeler
               </CardTitle>
-              <CardDescription>Payments due in the next 7 days</CardDescription>
+              <CardDescription>Önümüzdeki 7 gün içinde vadesi gelen ödemeler</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                   className="w-full"
                   onClick={() => router.push('/payments')}
                 >
-                  View All Payments
+                  Tüm Ödemeleri Görüntüle
                 </Button>
               </div>
             </CardContent>
@@ -287,9 +287,9 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center text-red-600">
                 <AlertTriangle className="h-5 w-5 mr-2" />
-                Overdue Payments
+                Geciken Ödemeler
               </CardTitle>
-              <CardDescription>Payments that require immediate attention</CardDescription>
+              <CardDescription>Acil dikkat gerektiren ödemeler</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -299,13 +299,13 @@ export default function DashboardPage() {
                       <p className="font-medium">{payment.client}</p>
                       <p className="text-sm text-gray-600">{payment.milestone}</p>
                       <Badge variant="destructive" className="mt-1">
-                        {payment.daysOverdue} days overdue
+                        {payment.daysOverdue} gün gecikmiş
                       </Badge>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">${payment.amount.toLocaleString()}</p>
                       <Button size="sm" className="mt-2">
-                        Send Reminder
+                        Hatırlatma Gönder
                       </Button>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
                   className="w-full"
                   onClick={() => router.push('/payments')}
                 >
-                  Manage All Payments
+                  Tüm Ödemeleri Yönet
                 </Button>
               </div>
             </CardContent>
@@ -326,9 +326,9 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
-                Recent Changes
+                Son Değişiklikler
               </CardTitle>
-              <CardDescription>Latest change requests and approvals</CardDescription>
+              <CardDescription>Son değişiklik talepleri ve onaylar</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                   className="w-full"
                   onClick={() => router.push('/changes')}
                 >
-                  View All Changes
+                  Tüm Değişiklikleri Görüntüle
                 </Button>
               </div>
             </CardContent>
@@ -362,9 +362,9 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <AlertTriangle className="h-5 w-5 mr-2" />
-                Risk Items
+                Risk Öğeleri
               </CardTitle>
-              <CardDescription>Items that need your attention</CardDescription>
+              <CardDescription>Dikkatinizi gerektiren öğeler</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -384,7 +384,7 @@ export default function DashboardPage() {
                   className="w-full"
                   onClick={() => router.push('/contracts')}
                 >
-                  Review Contracts
+                  Sözleşmeleri İncele
                 </Button>
               </div>
             </CardContent>

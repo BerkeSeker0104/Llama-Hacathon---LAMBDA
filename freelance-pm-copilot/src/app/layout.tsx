@@ -5,8 +5,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
-  title: "Freelance PM Copilot",
-  description: "AI-powered project management for freelancers",
+  title: "Serbest PM Asistanı",
+  description: "Serbest çalışanlar için yapay zeka destekli proje yönetimi",
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <body className="font-sans antialiased">
         <ErrorBoundary>
           <ToastProvider>

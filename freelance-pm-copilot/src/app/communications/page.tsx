@@ -181,17 +181,17 @@ export default function CommunicationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Communications</h1>
-              <p className="text-gray-600">Manage email templates and communication history</p>
+              <h1 className="text-2xl font-bold text-gray-900">İletişim</h1>
+              <p className="text-gray-600">E-posta şablonlarını ve iletişim geçmişini yönetin</p>
             </div>
             <div className="flex space-x-2">
               <Button variant="outline">
                 <FileText className="h-4 w-4 mr-2" />
-                Email Templates
+                E-posta Şablonları
               </Button>
               <Button>
                 <Send className="h-4 w-4 mr-2" />
-                Send Email
+                E-posta Gönder
               </Button>
             </div>
           </div>

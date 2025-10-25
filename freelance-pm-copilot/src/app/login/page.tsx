@@ -29,7 +29,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Login: Sign in error:', error);
-      setError(error.message || 'Failed to sign in');
+      setError(error.message || 'Giriş yapılamadı');
     } finally {
       setLoading(false);
     }
@@ -39,15 +39,15 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
+          <CardTitle>Giriş Yap</CardTitle>
           <CardDescription>
-            Enter your credentials to access your workspace
+            Çalışma alanınıza erişmek için kimlik bilgilerinizi girin
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-posta</Label>
               <Input
                 id="email"
                 type="email"
@@ -57,7 +57,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Şifre</Label>
               <Input
                 id="password"
                 type="password"
@@ -70,14 +70,14 @@ export default function LoginPage() {
               <div className="text-red-500 text-sm">{error}</div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </Button>
           </form>
           <div className="mt-4 text-center">
             <span className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Hesabınız yok mu?{' '}
               <Link href="/register" className="text-blue-600 hover:underline">
-                Sign up
+                Kayıt ol
               </Link>
             </span>
           </div>

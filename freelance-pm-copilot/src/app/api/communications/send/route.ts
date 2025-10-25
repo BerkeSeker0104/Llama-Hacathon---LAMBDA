@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!to || !subject || !emailBody || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
     // Send email
@@ -43,12 +43,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Email sent successfully',
+      message: 'E-posta başarıyla gönderildi',
       communicationId,
       emailId: emailResult.id 
     });
   } catch (error) {
     console.error('Error sending email:', error);
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    return NextResponse.json({ error: 'E-posta gönderilemedi' }, { status: 500 });
   }
 }

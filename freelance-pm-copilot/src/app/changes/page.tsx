@@ -170,7 +170,7 @@ export default function ChangesPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading change requests...</p>
+          <p className="mt-4 text-gray-600">Değişiklik talepleri yükleniyor...</p>
         </div>
       </div>
     );
@@ -183,12 +183,12 @@ export default function ChangesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Change Management</h1>
-              <p className="text-gray-600">Manage change requests and scope modifications</p>
+              <h1 className="text-2xl font-bold text-gray-900">Değişiklik Yönetimi</h1>
+              <p className="text-gray-600">Değişiklik taleplerini ve kapsam değişikliklerini yönetin</p>
             </div>
             <Button onClick={() => setShowNewForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              New Change Request
+              Yeni Değişiklik Talebi
             </Button>
           </div>
         </div>
@@ -200,18 +200,18 @@ export default function ChangesPage() {
         {showNewForm && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Create New Change Request</CardTitle>
+              <CardTitle>Yeni Değişiklik Talebi Oluştur</CardTitle>
               <CardDescription>
-                Analyze a client&apos;s change request and generate options
+                Müşterinin değişiklik talebini analiz edin ve seçenekler oluşturun
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contract">Select Contract</Label>
+                  <Label htmlFor="contract">Sözleşme Seçin</Label>
                   <Select value={selectedContract} onValueChange={setSelectedContract}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose a contract" />
+                      <SelectValue placeholder="Bir sözleşme seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {contracts.map((contract) => (
@@ -225,10 +225,10 @@ export default function ChangesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="request">Client Request</Label>
+                <Label htmlFor="request">Müşteri Talebi</Label>
                 <Textarea
                   id="request"
-                  placeholder="Paste the client's change request here..."
+                  placeholder="Müşterinin değişiklik talebini buraya yapıştırın..."
                   value={requestText}
                   onChange={(e) => setRequestText(e.target.value)}
                   rows={4}
@@ -240,7 +240,7 @@ export default function ChangesPage() {
                 disabled={!requestText.trim() || !selectedContract || analyzing}
                 className="w-full"
               >
-                {analyzing ? 'Analyzing...' : 'Analyze Request'}
+                {analyzing ? 'Analiz ediliyor...' : 'Talebi Analiz Et'}
               </Button>
 
               {/* Analysis Results */}

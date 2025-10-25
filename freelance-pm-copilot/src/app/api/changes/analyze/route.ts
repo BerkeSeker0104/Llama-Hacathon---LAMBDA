@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const { requestText, contractId, userId } = body;
 
     if (!requestText || !contractId || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
     // Create change request in Firestore
@@ -30,20 +30,20 @@ export async function POST(request: NextRequest) {
       },
       options: [
         {
-          title: 'Basic Implementation',
-          description: 'Simple version of the requested feature',
+        title: 'Temel Uygulama',
+        description: 'İstenen özelliğin basit versiyonu',
           timeline: '1 week',
           cost: '$2,000'
         },
         {
-          title: 'Full Implementation',
-          description: 'Complete feature with all requested functionality',
+        title: 'Tam Uygulama',
+        description: 'Tüm istenen işlevsellikle eksiksiz özellik',
           timeline: '2 weeks',
           cost: '$4,000'
         },
         {
-          title: 'Premium Implementation',
-          description: 'Advanced version with additional features',
+        title: 'Premium Uygulama',
+        description: 'Ek özelliklerle gelişmiş versiyon',
           timeline: '3 weeks',
           cost: '$6,000'
         }

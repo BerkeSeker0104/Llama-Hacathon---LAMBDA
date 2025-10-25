@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { title, clientName, clientEmail, userId } = body;
 
     if (!title || !clientName || !clientEmail || !userId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
     // Create contract using the service
@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       contractId,
-      message: 'Contract created successfully' 
+      message: 'Sözleşme başarıyla oluşturuldu' 
     });
   } catch (error) {
     console.error('Error creating contract:', error);
-    return NextResponse.json({ error: 'Failed to create contract' }, { status: 500 });
+    return NextResponse.json({ error: 'Sözleşme oluşturulamadı' }, { status: 500 });
   }
 }

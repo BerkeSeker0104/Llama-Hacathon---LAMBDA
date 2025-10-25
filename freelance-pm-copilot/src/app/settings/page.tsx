@@ -27,7 +27,7 @@ export default function SettingsPage() {
   // Mock settings data
   const [settings, setSettings] = useState({
     workspace: {
-      name: 'Freelance PM Workspace',
+      name: 'Serbest PM Çalışma Alanı',
       email: user?.email || '',
       phone: '+1 (555) 123-4567',
       website: 'https://freelancepm.com',
@@ -35,10 +35,10 @@ export default function SettingsPage() {
       currency: 'USD'
     },
     email: {
-      fromName: 'Sarah Johnson',
-      fromEmail: 'sarah@freelancepm.com',
-      replyTo: 'sarah@freelancepm.com',
-      signature: 'Best regards,\nSarah Johnson\nFreelance Developer\nsarah@freelancepm.com'
+      fromName: 'Ayşe Yılmaz',
+      fromEmail: 'ayse@serbestpm.com',
+      replyTo: 'ayse@serbestpm.com',
+      signature: 'Saygılarımla,\nAyşe Yılmaz\nSerbest Geliştirici\nayse@serbestpm.com'
     },
     notifications: {
       paymentReminders: true,
@@ -58,7 +58,7 @@ export default function SettingsPage() {
     // Simulate save
     setTimeout(() => {
       setSaving(false);
-      alert('Settings saved successfully!');
+      alert('Ayarlar başarıyla kaydedildi!');
     }, 1000);
   };
 
@@ -73,8 +73,8 @@ export default function SettingsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-              <p className="text-gray-600">Manage your workspace and preferences</p>
+              <h1 className="text-2xl font-bold text-gray-900">Ayarlar</h1>
+              <p className="text-gray-600">Çalışma alanınızı ve tercihlerinizi yönetin</p>
             </div>
             <div className="flex space-x-2">
               <Button variant="outline" onClick={handleLogout}>

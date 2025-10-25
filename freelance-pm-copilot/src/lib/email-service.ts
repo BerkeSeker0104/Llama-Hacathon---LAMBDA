@@ -14,69 +14,69 @@ export interface EmailTemplate {
 export const emailTemplates: EmailTemplate[] = [
   {
     id: 'payment_reminder_gentle',
-    name: 'Gentle Payment Reminder',
-    subject: 'Friendly reminder about your upcoming payment',
+    name: 'Nazik Ödeme Hatırlatması',
+    subject: 'Yaklaşan ödemeniz hakkında dostane hatırlatma',
     body: `Hi {{clientName}},
 
-I hope you're doing well! I wanted to send a gentle reminder that we have a payment of {{amount}} {{currency}} due on {{dueDate}} for the {{milestone}} milestone.
+Umarım iyisinizdir! {{milestone}} kilometre taşı için {{dueDate}} tarihinde vadesi gelen {{amount}} {{currency}} tutarındaki ödeme hakkında nazik bir hatırlatma göndermek istiyorum.
 
-I understand that schedules can get busy, so please let me know if you need any clarification or if there's anything I can help with.
+Programların yoğun olabileceğini anlıyorum, bu yüzden herhangi bir açıklamaya ihtiyacınız olursa veya yardımcı olabileceğim bir şey varsa lütfen bana bildirin.
 
-Thank you for your continued partnership!
+Devam eden ortaklığınız için teşekkürler!
 
-Best regards,
+Saygılarımla,
 {{freelancerName}}`,
     tone: 'gentle',
     type: 'payment_reminder'
   },
   {
     id: 'payment_reminder_neutral',
-    name: 'Neutral Payment Reminder',
-    subject: 'Payment Reminder - {{milestone}}',
+    name: 'Nötr Ödeme Hatırlatması',
+    subject: 'Ödeme Hatırlatması - {{milestone}}',
     body: `Hi {{clientName}},
 
-This is a reminder that payment of {{amount}} {{currency}} for the {{milestone}} milestone is due on {{dueDate}}.
+{{milestone}} kilometre taşı için {{amount}} {{currency}} tutarındaki ödemenin {{dueDate}} tarihinde vadesi geldiğini hatırlatırım.
 
-Please process this payment at your earliest convenience. If you have any questions, feel free to reach out.
+Lütfen bu ödemeyi en kısa sürede işleme alın. Herhangi bir sorunuz olursa, bana ulaşmaktan çekinmeyin.
 
-Best regards,
+Saygılarımla,
 {{freelancerName}}`,
     tone: 'neutral',
     type: 'payment_reminder'
   },
   {
     id: 'payment_reminder_firm',
-    name: 'Firm Payment Reminder',
-    subject: 'Overdue Payment - {{milestone}}',
+    name: 'Sert Ödeme Hatırlatması',
+    subject: 'Geciken Ödeme - {{milestone}}',
     body: `Hi {{clientName}},
 
-Payment of {{amount}} {{currency}} for the {{milestone}} milestone was due on {{dueDate}} and is now overdue.
+{{milestone}} kilometre taşı için {{amount}} {{currency}} tutarındaki ödeme {{dueDate}} tarihinde vadesi gelmişti ve şimdi gecikmiş durumda.
 
-Please process this payment immediately to avoid any delays in project delivery. If there are any issues preventing payment, please contact me directly.
+Proje teslimatında gecikme yaşamamak için lütfen bu ödemeyi derhal işleme alın. Ödemeyi engelleyen herhangi bir sorun varsa, lütfen doğrudan benimle iletişime geçin.
 
-Best regards,
+Saygılarımla,
 {{freelancerName}}`,
     tone: 'firm',
     type: 'payment_reminder'
   },
   {
     id: 'change_order_proposal',
-    name: 'Change Order Proposal',
-    subject: 'Change Request - {{contractTitle}}',
+    name: 'Değişiklik Emri Teklifi',
+    subject: 'Değişiklik Talebi - {{contractTitle}}',
     body: `Hi {{clientName}},
 
-Thank you for your change request. I've analyzed your request and prepared the following options:
+Değişiklik talebiniz için teşekkürler. Talebinizi analiz ettim ve aşağıdaki seçenekleri hazırladım:
 
-**Request:** {{requestText}}
+**Talep:** {{requestText}}
 
-**Analysis:** {{analysis}}
+**Analiz:** {{analysis}}
 
-**Proposed Options:**
+**Önerilen Seçenekler:**
 {{options}}
 
-Please review these options and let me know which one you'd like to proceed with, or if you have any questions.
+Lütfen bu seçenekleri inceleyin ve hangisiyle devam etmek istediğinizi veya herhangi bir sorunuz olup olmadığını bana bildirin.
 
-Best regards,
+Saygılarımla,
 {{freelancerName}}`,
     tone: 'neutral',
     type: 'change_order'
