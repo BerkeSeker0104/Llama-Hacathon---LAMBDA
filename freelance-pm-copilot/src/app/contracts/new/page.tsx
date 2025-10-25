@@ -78,9 +78,12 @@ export default function NewContractPage() {
         status: 'analyzing'
       });
 
-      // Trigger AI analysis
+      // Trigger AI analysis - Call Cloud Function directly
       try {
-        const response = await fetch('/api/contracts/trigger-analysis', {
+        const cloudFunctionUrl = 'https://us-central1-lambda-926aa.cloudfunctions.net/analyzeContract';
+        console.log('Calling Cloud Function directly:', cloudFunctionUrl);
+        
+        const response = await fetch(cloudFunctionUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -93,14 +96,20 @@ export default function NewContractPage() {
         });
 
         if (response.ok) {
-          // Simulate analysis time (in real app, this would be handled by Cloud Function)
-          setTimeout(() => {
+          const result = await response.json();
+          console.log('Cloud Function response:', result);
+          
+          if (result.success) {
             setStatus('complete');
             // Redirect to contract detail page
             router.push(`/contracts/${contractId}`);
-          }, 3000);
+          } else {
+            throw new Error(result.error || 'Analysis failed');
+          }
         } else {
-          throw new Error('Failed to trigger AI analysis');
+          const errorText = await response.text();
+          console.error('Cloud Function error:', response.status, errorText);
+          throw new Error(`Cloud Function error: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
         console.error('Error triggering AI analysis:', error);
