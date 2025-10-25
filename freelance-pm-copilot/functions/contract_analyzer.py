@@ -106,7 +106,8 @@ def parse_pdf_with_llama(pdf_path):
     """
     try:
         parser = LlamaParse(
-            api_key=llama_api_key
+            api_key=llama_api_key,
+            result_type="text"
         )
 
         # Parse the PDF
