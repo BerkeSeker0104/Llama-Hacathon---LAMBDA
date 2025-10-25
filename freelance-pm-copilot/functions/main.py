@@ -34,13 +34,25 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
     Cloud Function to analyze contract PDF using AI
     """
     print("=== analyzeContract START ===")
+    print(f"Request method: {req.method}")
+    print(f"Request URL: {req.url}")
+    print(f"Request headers: {dict(req.headers)}")
+    
+    # CORS headers for all responses
+    cors_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Content-Type': 'application/json'
+    }
     
     try:
-        # Log request details
-        print(f"Request method: {req.method}")
-        print(f"Request headers: {dict(req.headers)}")
+        # Handle preflight OPTIONS request
+        if req.method == 'OPTIONS':
+            print("Handling OPTIONS preflight request")
+            return https_fn.Response('', status=200, headers=cors_headers)
         
-        # Import here to avoid circular imports
+        # Log request details
         print("Importing contract_analyzer...")
         from contract_analyzer import analyze_contract
         print("contract_analyzer imported successfully")
@@ -52,7 +64,11 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
         
         if not data:
             print("ERROR: No data provided")
-            return https_fn.Response("No data provided", status=400)
+            return https_fn.Response(
+                json.dumps({'error': 'No data provided'}), 
+                status=400, 
+                headers=cors_headers
+            )
         
         contract_id = data.get('contractId')
         pdf_url = data.get('pdfUrl')
@@ -64,7 +80,11 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
         
         if not contract_id or not (pdf_url or pdf_path):
             print("ERROR: Missing contractId or PDF reference")
-            return https_fn.Response("Missing contractId or PDF reference", status=400)
+            return https_fn.Response(
+                json.dumps({'error': 'Missing contractId or PDF reference'}), 
+                status=400, 
+                headers=cors_headers
+            )
         
         # Call the contract analyzer
         print("Calling analyze_contract...")
@@ -80,7 +100,7 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
                     'contractId': contract_id
                 }),
                 status=200,
-                headers={'Content-Type': 'application/json'}
+                headers=cors_headers
             )
         else:
             print(f"Analysis failed: {analysis_result.get('error', 'Unknown error')}")
@@ -90,7 +110,7 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
                     'error': analysis_result.get('error', 'Analysis failed')
                 }),
                 status=500,
-                headers={'Content-Type': 'application/json'}
+                headers=cors_headers
             )
             
     except Exception as e:
@@ -109,7 +129,7 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
                 'error_type': type(e).__name__
             }),
             status=500,
-            headers={'Content-Type': 'application/json'}
+            headers=cors_headers
         )
 
 @https_fn.on_request()
@@ -117,20 +137,43 @@ def generateSprintPlan(req: https_fn.Request) -> https_fn.Response:
     """
     Cloud Function to generate sprint plan for a contract
     """
+    print("=== generateSprintPlan START ===")
+    
+    # CORS headers for all responses
+    cors_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Content-Type': 'application/json'
+    }
+    
     try:
+        # Handle preflight OPTIONS request
+        if req.method == 'OPTIONS':
+            print("Handling OPTIONS preflight request")
+            return https_fn.Response('', status=200, headers=cors_headers)
+        
         # Import here to avoid circular imports
         from sprint_planner import generate_sprint_plan
         
         # Get request data
         data = req.get_json()
         if not data:
-            return https_fn.Response("No data provided", status=400)
+            return https_fn.Response(
+                json.dumps({'error': 'No data provided'}), 
+                status=400, 
+                headers=cors_headers
+            )
         
         contract_id = data.get('contractId')
         sprint_duration_weeks = data.get('sprintDurationWeeks', 2)
         
         if not contract_id:
-            return https_fn.Response("Missing contractId", status=400)
+            return https_fn.Response(
+                json.dumps({'error': 'Missing contractId'}), 
+                status=400, 
+                headers=cors_headers
+            )
         
         # Call the sprint planner
         plan_result = generate_sprint_plan(contract_id, sprint_duration_weeks)
@@ -143,7 +186,7 @@ def generateSprintPlan(req: https_fn.Request) -> https_fn.Response:
                     'planId': plan_result.get('planId')
                 }),
                 status=200,
-                headers={'Content-Type': 'application/json'}
+                headers=cors_headers
             )
         else:
             return https_fn.Response(
@@ -152,13 +195,23 @@ def generateSprintPlan(req: https_fn.Request) -> https_fn.Response:
                     'error': plan_result.get('error', 'Sprint plan generation failed')
                 }),
                 status=500,
-                headers={'Content-Type': 'application/json'}
+                headers=cors_headers
             )
             
     except Exception as e:
-        print(f"Error in generateSprintPlan: {str(e)}")
+        print(f"=== CRITICAL ERROR in generateSprintPlan ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END ERROR ===")
+        
         return https_fn.Response(
-            json.dumps({'success': False, 'error': str(e)}),
+            json.dumps({
+                'success': False, 
+                'error': f"Critical error: {str(e)}",
+                'error_type': type(e).__name__
+            }),
             status=500,
-            headers={'Content-Type': 'application/json'}
+            headers=cors_headers
         )
