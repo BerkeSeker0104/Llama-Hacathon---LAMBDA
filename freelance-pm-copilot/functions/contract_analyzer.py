@@ -68,7 +68,7 @@ Başka hiçbir açıklama, selamlama veya yorum yapma.
 
 def download_pdf_from_storage(pdf_url=None, pdf_path=None):
     """
-    Download PDF from Firebase Storage to temporary file
+    Download PDF from Firebase Storage to temporary file using Firebase Admin SDK
     """
     try:
         object_path = None
@@ -80,13 +80,27 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
             else:
                 object_path = pdf_path.lstrip("/")
         elif pdf_url:
-            object_path = extract_storage_path_from_url(pdf_url)
+            # Extract path from Firebase Storage URL
+            if "firebasestorage.googleapis.com" in pdf_url:
+                # Parse Firebase Storage URL: https://firebasestorage.googleapis.com/v0/b/bucket/o/path?alt=media
+                from urllib.parse import urlparse, unquote
+                parsed_url = urlparse(pdf_url)
+                path_parts = parsed_url.path.split('/')
+                if len(path_parts) >= 4 and path_parts[1] == "v0" and path_parts[2] == "b":
+                    # Extract the file path after /o/
+                    object_path = unquote(path_parts[4]) if len(path_parts) > 4 else None
+            else:
+                object_path = extract_storage_path_from_url(pdf_url)
 
         if not object_path:
             raise ValueError("Could not determine storage object path for PDF")
         
-        # Download the file
+        # Use Firebase Admin SDK to download the file
         blob = bucket.blob(object_path)
+        
+        # Check if file exists
+        if not blob.exists():
+            raise ValueError(f"File does not exist in storage: {object_path}")
         
         # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
