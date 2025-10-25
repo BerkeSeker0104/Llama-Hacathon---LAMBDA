@@ -16,9 +16,11 @@ import {
   Clock,
   Mail
 } from 'lucide-react';
-import { ContractService } from '@/lib/firestore-service';
-import { ChangeRequestService } from '@/lib/firestore-service';
+import { ContractService, ChangeRequestService } from '@/lib/firestore-service';
 import { ChangeRequest, Contract, ChangeAnalysis } from '@/lib/firestore-schema';
+import Sidebar from '@/components/Sidebar';
+import PageHeader from '@/components/PageHeader';
+import Loading from '@/components/Loading';
 
 // Using ChangeRequest interface from firestore-schema
 
@@ -177,7 +179,28 @@ export default function ChangesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
+      <Sidebar />
+
+      <div className="lg:pl-64">
+        <PageHeader
+          title="Change Management"
+          description="Track and manage project change requests"
+          breadcrumbs={[
+            { label: 'Changes', href: '/changes' }
+          ]}
+          actions={
+            <Button
+              onClick={() => setShowNewForm(true)}
+              className="bg-[#00ff88] text-black hover:bg-[#00ff88]/80 hover:neon-glow"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Change Request
+            </Button>
+          }
+        />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -302,8 +325,8 @@ export default function ChangesPage() {
         {/* Change Requests List */}
         <div className="space-y-6">
           {changes.map((change) => (
-            <Card key={change.id}>
-              <CardContent className="p-6">
+            <div key={change.id} className="glass-card p-6 hover-glow">
+              <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(change.status)}
@@ -373,8 +396,7 @@ export default function ChangesPage() {
         </div>
 
         {changes.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
+          <div className="glass-card p-8 text-center">
               <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <h3 className="text-lg font-medium mb-2">No change requests yet</h3>
               <p className="text-gray-600 mb-4">Create your first change request to get started.</p>

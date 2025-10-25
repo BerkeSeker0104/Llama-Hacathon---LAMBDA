@@ -34,15 +34,35 @@ bucket = storage.bucket()
 print(f"Firebase Storage bucket name: {bucket.name}")
 print(f"Firebase Storage bucket path: {bucket.path}")
 
-SYSTEM_PROMPT = """
-Sen, freelancer sözleşmeleri konusunda uzman bir hukuk asistanısın.
-Görevin, sana verilen sözleşme metnini analiz etmek ve SADECE ve SADECE 
-istenen bilgileri içeren geçerli bir JSON nesnesi döndürmektir. 
-Başka hiçbir açıklama, selamlama veya yorum yapma.
+# B2B Enhanced Contract Analysis with Ambiguity Detection
+AMBIGUITY_SYSTEM_PROMPT = """
+Sen, yazılım projesi sözleşmelerini analiz eden uzman bir AI asistanısın.
+Görevin, sözleşme metnindeki belirsizlikleri (ambiguities), riskleri ve netleştirilmesi gereken maddeleri tespit etmektir.
 
-İstenen JSON yapısı şu şekilde olmalıdır:
+Çıktı formatı:
 {
-  "summary": "Projenin genel kapsamının, temel hedeflerinin ve tarafların ana sorumluluklarının 1-2 cümlelik özeti.",
+  "summary": "Projenin 1-2 cümlelik özeti",
+  "ambiguities": [
+    {
+      "id": "amb_1",
+      "clause": "Belirsiz maddenin tam metni",
+      "issue": "Neyin belirsiz olduğu",
+      "severity": "low" | "medium" | "high" | "critical",
+      "suggestedRedline": "Önerilen düzeltilmiş metin",
+      "clarificationQuestions": ["Soru 1", "Soru 2"]
+    }
+  ],
+  "risks": [
+    {
+      "id": "risk_1",
+      "title": "Risk başlığı",
+      "description": "Risk açıklaması",
+      "severity": "low" | "medium" | "high" | "critical",
+      "probability": 0-100,
+      "impact": 0-100,
+      "mitigation": "Önerilen risk azaltma stratejisi"
+    }
+  ],
   "deliverables": [
     {
       "id": "del_1", 
@@ -67,19 +87,48 @@ Başka hiçbir açıklama, selamlama veya yorum yapma.
       "description": "Ödeme koşulu veya açıklaması (örn: 'Proje başlangıcında', 'İlk taslak tesliminde')"
     }
   ],
-  "risks": [
-    {
-      "id": "risk_1",
-      "title": "Riskin kısa başlığı (örn: 'Kapsam Kayması Riski', 'Belirsiz Kabul Kriterleri')",
-      "severity": "low" | "medium" | "high",
-      "description": "Riskin veya belirsiz maddenin açıklaması ve metindeki ilgili bölüm."
-    }
-  ],
   "timeline": {
     "optimistic": "YYYY-MM-DD (Metindeki bilgilere dayanarak tahmini en erken bitiş tarihi, bulunamazsa null)",
     "realistic": "YYYY-MM-DD (Metindeki bilgilere dayanarak tahmini gerçekçi bitiş tarihi, bulunamazsa null)",
     "pessimistic": "YYYY-MM-DD (Metindeki bilgilere dayanarak tahmini en geç bitiş tarihi, bulunamazsa null)"
   }
+}
+"""
+
+# Legacy system prompt for backward compatibility
+SYSTEM_PROMPT = """
+Sen, bir ürün yöneticisi tarafından yazılan kodlama projesi görevlerini (task) analiz eden kıdemli bir teknik analiz uzmanısın.
+Görevin, sana verilen görev metnini analiz etmek ve SADECE ve SADECE 
+istenen bilgileri içeren geçerli bir JSON nesnesi döndürmektir. 
+Başka hiçbir açıklama, selamlama veya yorum yapma.
+
+Çıkarım yapman, metindeki belirsizlikleri fark etmen ve teknik gereksinimleri tahmin etmen gerekiyor.
+
+İstenen JSON yapısı şu şekilde olmalıdır:
+{
+  "detailedDescription": "Metinden çıkarılan, projenin tam kapsamını ve temel hedeflerini detaylıca anlatan bir paragraf.",
+  "criticalAnalysis": {
+    "missingInfo": [
+      "Projenin netleşmesi veya başlaması için metinde bulunmayan, kritik öneme sahip eksik bilgiler (örn: 'Başarı metrikleri tanımlanmamış', 'Hedef kullanıcı kitlesi belirsiz'). Eğer eksik bilgi yoksa boş bir dizi [] döndür."
+    ],
+    "risks": [
+      "Metindeki ifadelere dayanarak öngörülen teknik veya operasyonel riskler (örn: 'Zaman çizelgesi, istenen özellikler için çok sıkışık', 'Belirtilen teknoloji ile entegrasyon zorluğu riski'). Eğer belirgin bir risk yoksa boş bir dizi [] döndür."
+    ],
+    "contradictions": [
+      "Metin içinde birbiriyle çelişen ifadeler veya hedefler (örn: 'Hem 'minimum maliyet' hem de 'en yüksek performanslı altyapı' isteniyor'). Eğer çelişki yoksa boş bir dizi [] döndür."
+    ]
+  },
+  "department": "Bu görevin birincil sorumlusu olması gereken departman veya ekip (örn: 'Backend', 'Frontend', 'Data Science', 'DevOps', 'Mobile'). Metinden bu çıkarımı yap.",
+  "techStack": [
+    "Metinde açıkça belirtilen veya görevin doğası gereği zorunlu olduğu çıkarımı yapılan teknolojiler, diller veya frameworkler (örn: 'Python', 'React', 'Node.js', 'PostgreSQL', 'AWS Lambda')."
+  ],
+  "timeline": {
+    "startDate": "YYYY-MM-DD formatında projenin tahmini başlangıç tarihi (eğer metinde spesifik bir tarih varsa, yoksa null)",
+    "endDate": "YYYY-MM-DD formatında projenin teslim tarihi (eğer metinde spesifik bir tarih varsa, yoksa null)"
+  },
+  "acceptanceCriteria": [
+    "Görevin 'tamamlandı' sayılması için karşılanması gereken spesifik, ölçülebilir ve test edilebilir şartlar (örn: 'Tüm API endpointleri %99.9 uptime sağlamalı', 'Sayfa yüklenme hızı 3 saniyenin altında olmalı', 'Kullanıcı girişi 100ms içinde gerçekleşmeli')."
+  ]
 }
 """
 
@@ -121,9 +170,30 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
                     encoded_path = encoded_path.split('?')[0] if '?' in encoded_path else encoded_path
                     object_path = unquote(encoded_path)
                     print(f"Extracted object path: {object_path}")
+                else:
+                    print("Using extract_storage_path_from_url...")
+                    object_path = extract_storage_path_from_url(pdf_url)
             else:
                 print("Using extract_storage_path_from_url...")
-                object_path = extract_storage_path_from_url(pdf_url)
+                try:
+                    object_path = extract_storage_path_from_url(pdf_url)
+                except ValueError as e:
+                    print(f"Error extracting storage path: {str(e)}")
+                    # If it's not a Firebase Storage URL, try direct download
+                    if "firebasestorage.googleapis.com" not in pdf_url and "storage.googleapis.com" not in pdf_url:
+                        print("Attempting direct download from non-Firebase URL...")
+                        import requests
+                        response = requests.get(pdf_url)
+                        if response.status_code == 200:
+                            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+                            temp_file.write(response.content)
+                            temp_file.close()
+                            print(f"Downloaded via direct URL to: {temp_file.name}")
+                            return temp_file.name
+                        else:
+                            raise ValueError(f"Direct download failed with status: {response.status_code}")
+                    else:
+                        raise e
 
         print(f"Final object_path: {object_path}")
         
@@ -198,27 +268,50 @@ def extract_storage_path_from_url(pdf_url: str) -> str:
     path = parsed_url.path
     bucket_name = bucket.name
 
+    print(f"Parsing URL: {pdf_url}")
+    print(f"Host: {host}")
+    print(f"Path: {path}")
+    print(f"Bucket name: {bucket_name}")
+
     # Format: https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encoded_path>
     if 'firebasestorage.googleapis.com' in host:
         if '/o/' in path:
             encoded_path = path.split('/o/', 1)[1]
-            return unquote(encoded_path)
+            # Remove query parameters if present
+            encoded_path = encoded_path.split('?')[0] if '?' in encoded_path else encoded_path
+            decoded_path = unquote(encoded_path)
+            print(f"Extracted from firebasestorage URL: {decoded_path}")
+            return decoded_path
         # Some URLs may include the object path in query params
         query_params = parse_qs(parsed_url.query)
         if 'name' in query_params:
-            return unquote(query_params['name'][0])
+            decoded_path = unquote(query_params['name'][0])
+            print(f"Extracted from query params: {decoded_path}")
+            return decoded_path
 
     # Format: https://storage.googleapis.com/<bucket>/<object_path>
     if host == 'storage.googleapis.com':
         parts = path.lstrip('/').split('/', 1)
         if len(parts) == 2 and parts[0] == bucket_name:
-            return unquote(parts[1])
+            decoded_path = unquote(parts[1])
+            print(f"Extracted from storage.googleapis.com: {decoded_path}")
+            return decoded_path
 
     # Format: https://<bucket>.storage.googleapis.com/<object_path>
     if host.endswith('.storage.googleapis.com'):
         potential_bucket = host.replace('.storage.googleapis.com', '')
         if potential_bucket == bucket_name:
-            return unquote(path.lstrip('/'))
+            decoded_path = unquote(path.lstrip('/'))
+            print(f"Extracted from bucket.storage.googleapis.com: {decoded_path}")
+            return decoded_path
+
+    # If it's not a Firebase Storage URL, try to handle it as a direct file path
+    # This is useful for testing or when using direct file paths
+    if not any(domain in host for domain in ['firebasestorage.googleapis.com', 'storage.googleapis.com']):
+        print(f"Non-Firebase URL detected: {pdf_url}")
+        # For non-Firebase URLs, we'll need to handle them differently
+        # For now, raise an error but with more helpful message
+        raise ValueError(f"URL is not a Firebase Storage URL. Expected Firebase Storage URL format, got: {pdf_url}")
 
     raise ValueError("Invalid Firebase Storage URL format")
 
@@ -253,7 +346,7 @@ def parse_pdf_with_llama(pdf_path):
 
 def analyze_contract_with_groq(parsed_text):
     """
-    Analyze contract text using Groq API
+    Analyze contract text using Groq API (Legacy)
     """
     try:
         messages_to_groq = [
@@ -288,6 +381,45 @@ Lütfen bu metni sistem talimatlarında belirtilen JSON formatında analiz et:
         
     except Exception as e:
         print(f"Groq API error: {str(e)}")
+        raise
+
+def analyze_contract_with_ambiguity_detection(parsed_text):
+    """
+    Enhanced contract analysis with ambiguity detection using Groq API
+    """
+    try:
+        messages_to_groq = [
+            {
+                "role": "system",
+                "content": AMBIGUITY_SYSTEM_PROMPT
+            },
+            {
+                "role": "user",
+                "content": f"""Aşağıda bir sözleşme metni bulunmaktadır. 
+Lütfen bu metni sistem talimatlarında belirtilen JSON formatında analiz et:
+
+--- SÖZLEŞME METNİ ---
+{parsed_text}
+--- METİN SONU ---
+"""
+            }
+        ]
+
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",  # Daha güçlü model
+            messages=messages_to_groq,
+            temperature=0.1,
+            max_tokens=8192,
+            response_format={"type": "json_object"}
+        )
+
+        json_string_response = completion.choices[0].message.content
+        analysis_data = json.loads(json_string_response)
+        
+        return analysis_data
+        
+    except Exception as e:
+        print(f"Groq API error (ambiguity detection): {str(e)}")
         raise
 
 def save_analysis_to_firestore(contract_id, analysis_data):
@@ -330,9 +462,9 @@ def analyze_contract(contract_id, pdf_url, pdf_path=None):
         print("Parsing PDF with LlamaParse...")
         parsed_text = parse_pdf_with_llama(temp_file_path)
         
-        # Step 3: Analyze with Groq API
-        print("Analyzing contract with Groq API...")
-        analysis_data = analyze_contract_with_groq(parsed_text)
+        # Step 3: Analyze with Groq API (Enhanced with ambiguity detection)
+        print("Analyzing contract with Groq API (ambiguity detection)...")
+        analysis_data = analyze_contract_with_ambiguity_detection(parsed_text)
         
         # Step 4: Save to Firestore
         print("Saving analysis to Firestore...")

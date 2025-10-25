@@ -23,6 +23,14 @@ import {
   Communication, 
   Plan, 
   User,
+  Company,
+  Team,
+  Person,
+  Skill,
+  PersonSkill,
+  Project,
+  Assignment,
+  PlanVersion,
   COLLECTIONS,
   validateContract,
   validateChangeRequest,
@@ -293,5 +301,371 @@ export class PlanService {
       });
       callback(plans);
     });
+  }
+}
+
+// B2B Services
+
+// Company Service
+export class CompanyService {
+  static async getCompany(companyId: string): Promise<Company | null> {
+    const companyRef = doc(db, COLLECTIONS.COMPANIES, companyId);
+    const companySnap = await getDoc(companyRef);
+    
+    if (!companySnap.exists()) {
+      return null;
+    }
+    
+    const data = companySnap.data();
+    return {
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+      licenseExpiry: data.licenseExpiry?.toDate() || new Date()
+    } as Company;
+  }
+
+  static async updateCompany(companyId: string, data: Partial<Company>): Promise<void> {
+    const companyRef = doc(db, COLLECTIONS.COMPANIES, companyId);
+    await updateDoc(companyRef, {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  static subscribeToCompany(companyId: string, callback: (company: Company) => void): Unsubscribe {
+    const companyRef = doc(db, COLLECTIONS.COMPANIES, companyId);
+    
+    return onSnapshot(companyRef, (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        const company = {
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          licenseExpiry: data.licenseExpiry?.toDate() || new Date()
+        } as Company;
+        callback(company);
+      }
+    });
+  }
+}
+
+// Team Service
+export class TeamService {
+  static async getTeamsByCompany(companyId: string): Promise<Team[]> {
+    const teamsRef = collection(db, COLLECTIONS.TEAMS);
+    const q = query(
+      teamsRef, 
+      where('companyId', '==', companyId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date()
+      } as Team;
+    });
+  }
+
+  static async getTeam(teamId: string): Promise<Team | null> {
+    const teamRef = doc(db, COLLECTIONS.TEAMS, teamId);
+    const teamSnap = await getDoc(teamRef);
+    
+    if (!teamSnap.exists()) {
+      return null;
+    }
+    
+    const data = teamSnap.data();
+    return {
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date()
+    } as Team;
+  }
+
+  static async createTeam(team: Omit<Team, 'id' | 'createdAt'>): Promise<string> {
+    const teamRef = doc(collection(db, COLLECTIONS.TEAMS));
+    const teamData = {
+      ...team,
+      id: teamRef.id,
+      createdAt: serverTimestamp()
+    };
+    
+    await setDoc(teamRef, teamData);
+    return teamRef.id;
+  }
+
+  static subscribeToTeams(companyId: string, callback: (teams: Team[]) => void): Unsubscribe {
+    const teamsRef = collection(db, COLLECTIONS.TEAMS);
+    const q = query(
+      teamsRef, 
+      where('companyId', '==', companyId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    return onSnapshot(q, (querySnapshot) => {
+      const teams = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as Team;
+      });
+      callback(teams);
+    });
+  }
+}
+
+// Person Service
+export class PersonService {
+  static async getPeopleByCompany(companyId: string): Promise<Person[]> {
+    const peopleRef = collection(db, COLLECTIONS.PEOPLE);
+    const q = query(
+      peopleRef, 
+      where('companyId', '==', companyId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date()
+      } as Person;
+    });
+  }
+
+  static async getPeopleByTeam(teamId: string): Promise<Person[]> {
+    const peopleRef = collection(db, COLLECTIONS.PEOPLE);
+    const q = query(
+      peopleRef, 
+      where('teamId', '==', teamId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date()
+      } as Person;
+    });
+  }
+
+  static async getPerson(personId: string): Promise<Person | null> {
+    const personRef = doc(db, COLLECTIONS.PEOPLE, personId);
+    const personSnap = await getDoc(personRef);
+    
+    if (!personSnap.exists()) {
+      return null;
+    }
+    
+    const data = personSnap.data();
+    return {
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date()
+    } as Person;
+  }
+
+  static async getPersonWithSkills(personId: string): Promise<{ person: Person; skills: PersonSkill[] } | null> {
+    const person = await this.getPerson(personId);
+    if (!person) return null;
+
+    const skills = await SkillService.getPersonSkills(personId);
+    return { person, skills };
+  }
+
+  static async updatePersonWorkload(personId: string, workload: number): Promise<void> {
+    const personRef = doc(db, COLLECTIONS.PEOPLE, personId);
+    await updateDoc(personRef, {
+      currentWorkload: workload
+    });
+  }
+
+  static subscribeToTeamPeople(teamId: string, callback: (people: Person[]) => void): Unsubscribe {
+    const peopleRef = collection(db, COLLECTIONS.PEOPLE);
+    const q = query(
+      peopleRef, 
+      where('teamId', '==', teamId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    return onSnapshot(q, (querySnapshot) => {
+      const people = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as Person;
+      });
+      callback(people);
+    });
+  }
+}
+
+// Skill Service
+export class SkillService {
+  static async getAllSkills(): Promise<Skill[]> {
+    const skillsRef = collection(db, COLLECTIONS.SKILLS);
+    const querySnapshot = await getDocs(skillsRef);
+    
+    return querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    })) as Skill[];
+  }
+
+  static async getPersonSkills(personId: string): Promise<PersonSkill[]> {
+    const personSkillsRef = collection(db, COLLECTIONS.PERSON_SKILLS);
+    const q = query(
+      personSkillsRef, 
+      where('personId', '==', personId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    })) as PersonSkill[];
+  }
+
+  static async addPersonSkill(personId: string, skillId: string, level: number): Promise<string> {
+    const skill = await this.getSkill(skillId);
+    if (!skill) throw new Error('Skill not found');
+
+    const personSkillRef = doc(collection(db, COLLECTIONS.PERSON_SKILLS));
+    const personSkillData = {
+      id: personSkillRef.id,
+      personId,
+      skillId,
+      skillKey: skill.key,
+      level
+    };
+    
+    await setDoc(personSkillRef, personSkillData);
+    return personSkillRef.id;
+  }
+
+  static async updatePersonSkillLevel(personSkillId: string, level: number): Promise<void> {
+    const personSkillRef = doc(db, COLLECTIONS.PERSON_SKILLS, personSkillId);
+    await updateDoc(personSkillRef, { level });
+  }
+
+  private static async getSkill(skillId: string): Promise<Skill | null> {
+    const skillRef = doc(db, COLLECTIONS.SKILLS, skillId);
+    const skillSnap = await getDoc(skillRef);
+    
+    if (!skillSnap.exists()) {
+      return null;
+    }
+    
+    return {
+      ...skillSnap.data(),
+      id: skillSnap.id
+    } as Skill;
+  }
+}
+
+// Project Service
+export class ProjectService {
+  static async getProjectsByCompany(companyId: string): Promise<Project[]> {
+    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const q = query(
+      projectsRef, 
+      where('companyId', '==', companyId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        startDate: data.startDate?.toDate(),
+        endDate: data.endDate?.toDate()
+      } as Project;
+    });
+  }
+
+  static async createProject(project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const projectRef = doc(collection(db, COLLECTIONS.PROJECTS));
+    const projectData = {
+      ...project,
+      id: projectRef.id,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    
+    await setDoc(projectRef, projectData);
+    return projectRef.id;
+  }
+
+  static async updateProjectStatus(projectId: string, status: Project['status']): Promise<void> {
+    const projectRef = doc(db, COLLECTIONS.PROJECTS, projectId);
+    await updateDoc(projectRef, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+  }
+}
+
+// Assignment Service
+export class AssignmentService {
+  static async getAssignmentsByTask(taskId: string): Promise<Assignment[]> {
+    const assignmentsRef = collection(db, COLLECTIONS.ASSIGNMENTS);
+    const q = query(
+      assignmentsRef, 
+      where('taskId', '==', taskId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        assignedAt: data.assignedAt?.toDate() || new Date()
+      } as Assignment;
+    });
+  }
+
+  static async getAssignmentsByPerson(personId: string): Promise<Assignment[]> {
+    const assignmentsRef = collection(db, COLLECTIONS.ASSIGNMENTS);
+    const q = query(
+      assignmentsRef, 
+      where('personId', '==', personId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        assignedAt: data.assignedAt?.toDate() || new Date()
+      } as Assignment;
+    });
+  }
+
+  static async createAssignment(assignment: Omit<Assignment, 'id' | 'assignedAt'>): Promise<string> {
+    const assignmentRef = doc(collection(db, COLLECTIONS.ASSIGNMENTS));
+    const assignmentData = {
+      ...assignment,
+      id: assignmentRef.id,
+      assignedAt: serverTimestamp()
+    };
+    
+    await setDoc(assignmentRef, assignmentData);
+    return assignmentRef.id;
+  }
+
+  static async updateAssignmentStatus(assignmentId: string, status: Assignment['status']): Promise<void> {
+    const assignmentRef = doc(db, COLLECTIONS.ASSIGNMENTS, assignmentId);
+    await updateDoc(assignmentRef, { status });
   }
 }

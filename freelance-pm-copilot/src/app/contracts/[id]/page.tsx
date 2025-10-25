@@ -21,6 +21,8 @@ import {
 import { ContractService } from '@/lib/firestore-service';
 import { Contract, ContractAnalysis } from '@/lib/firestore-schema';
 import SprintPlanView from '@/components/SprintPlanView';
+import AmbiguitiesView from '@/components/AmbiguitiesView';
+import WBSView from '@/components/WBSView';
 
 // Using Contract interface from firestore-schema
 
@@ -96,6 +98,32 @@ export default function ContractDetailPage() {
         description: 'RESTful API development with database integration',
         acceptanceCriteria: 'API endpoints functional, database optimized, security implemented',
         status: 'pending'
+      }
+    ],
+    ambiguities: [
+      {
+        id: 'amb_1',
+        clause: 'The website should be "modern and user-friendly"',
+        issue: 'Vague requirements - no specific design standards or usability metrics defined',
+        severity: 'high',
+        suggestedRedline: 'The website should follow Material Design principles with WCAG 2.1 AA accessibility standards',
+        clarificationQuestions: [
+          'What specific design system should be used?',
+          'What are the target user personas?',
+          'What accessibility standards are required?'
+        ]
+      },
+      {
+        id: 'amb_2',
+        clause: 'API should be "scalable and secure"',
+        issue: 'No performance benchmarks or security requirements specified',
+        severity: 'medium',
+        suggestedRedline: 'API should handle 1000 concurrent users with OAuth 2.0 authentication',
+        clarificationQuestions: [
+          'What is the expected user load?',
+          'What authentication method is preferred?',
+          'Are there specific security compliance requirements?'
+        ]
       }
     ],
     milestones: [
@@ -210,8 +238,10 @@ export default function ContractDetailPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="ambiguities">Ambiguities</TabsTrigger>
+            <TabsTrigger value="wbs">WBS & Tasks</TabsTrigger>
             <TabsTrigger value="scope">Scope & Deliverables</TabsTrigger>
             <TabsTrigger value="milestones">Milestones & Payments</TabsTrigger>
             <TabsTrigger value="risks">Risks & Gaps</TabsTrigger>
@@ -276,6 +306,16 @@ export default function ContractDetailPage() {
                 <p className="text-gray-700">{analysis.summary}</p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Ambiguities Tab */}
+          <TabsContent value="ambiguities" className="space-y-6">
+            <AmbiguitiesView ambiguities={analysis.ambiguities || []} />
+          </TabsContent>
+
+          {/* WBS & Tasks Tab */}
+          <TabsContent value="wbs" className="space-y-6">
+            <WBSView tasks={[]} />
           </TabsContent>
 
           {/* Scope & Deliverables Tab */}

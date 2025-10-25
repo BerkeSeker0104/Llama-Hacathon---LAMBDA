@@ -14,8 +14,12 @@ import {
   FileText,
   Users,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw,
+  BarChart3,
+  Kanban
 } from 'lucide-react';
+import CapacityHeatmap from '@/components/CapacityHeatmap';
 
 interface Plan {
   id: string;
@@ -253,6 +257,10 @@ export default function PlanningPage() {
                 <FileText className="h-4 w-4 mr-2" />
                 Export Plan
               </Button>
+              <Button variant="outline">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Replan
+              </Button>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Plan
@@ -264,7 +272,17 @@ export default function PlanningPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <Tabs defaultValue="timeline" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="board">Board</TabsTrigger>
+            <TabsTrigger value="capacity">Capacity</TabsTrigger>
+            <TabsTrigger value="gantt">Gantt</TabsTrigger>
+          </TabsList>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Plan Versions Sidebar */}
           <div className="lg:col-span-1">
             <Card>
@@ -427,6 +445,68 @@ export default function PlanningPage() {
             )}
           </div>
         </div>
+          </TabsContent>
+
+          {/* Board Tab */}
+          <TabsContent value="board" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Kanban className="h-5 w-5 mr-2" />
+                  Team Board
+                </CardTitle>
+                <CardDescription>
+                  Kanban board organized by teams and sprints
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <Kanban className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>Team Board view coming soon...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Capacity Tab */}
+          <TabsContent value="capacity" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Team Capacity
+                </CardTitle>
+                <CardDescription>
+                  Team capacity and workload distribution
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CapacityHeatmap teams={[]} people={[]} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Gantt Tab */}
+          <TabsContent value="gantt" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Gantt Chart
+                </CardTitle>
+                <CardDescription>
+                  Project timeline visualization
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>Gantt chart view coming soon...</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

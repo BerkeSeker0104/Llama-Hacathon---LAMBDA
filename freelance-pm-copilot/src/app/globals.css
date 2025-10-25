@@ -44,75 +44,66 @@
 }
 
 :root {
-  --font-geist-sans: "Inter", "system-ui", "Segoe UI", sans-serif;
-  --font-geist-mono: "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --font-geist-sans: "Inter", "system-ui", sans-serif;
+  --font-geist-mono: "Inter", "Menlo", "Monaco", "Consolas", monospace;
+  --radius: 0.75rem;
+  
+  /* Dark Theme - Always Active */
+  --background: #000000;
+  --foreground: #e5e5e5;
+  
+  /* Glassmorphism Cards */
+  --card: rgba(20, 20, 20, 0.6);
+  --card-foreground: #ffffff;
+  --card-border: rgba(255, 255, 255, 0.1);
+  
+  /* Neon Green Accent */
+  --primary: #00ff88;
+  --primary-foreground: #000000;
+  --primary-glow: rgba(0, 255, 136, 0.3);
+  
+  /* Secondary Colors */
+  --secondary: rgba(40, 40, 40, 0.8);
+  --secondary-foreground: #e5e5e5;
+  
+  /* Muted/Subtle */
+  --muted: rgba(30, 30, 30, 0.6);
+  --muted-foreground: #a0a0a0;
+  
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.05);
+  
+  /* Destructive */
+  --destructive: #ff4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Popover */
+  --popover: rgba(20, 20, 20, 0.8);
+  --popover-foreground: #ffffff;
+  
+  /* Ring */
+  --ring: #00ff88;
+  
+  /* Charts */
+  --chart-1: #00ff88;
+  --chart-2: #10b981;
+  --chart-3: #34d399;
+  --chart-4: #6ee7b7;
+  --chart-5: #a7f3d0;
+  
+  /* Sidebar */
+  --sidebar: rgba(10, 10, 10, 0.8);
+  --sidebar-foreground: #e5e5e5;
+  --sidebar-primary: #00ff88;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: rgba(40, 40, 40, 0.8);
+  --sidebar-accent-foreground: #e5e5e5;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #00ff88;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
+/* Dark theme is now default - no separate .dark class needed */
 
 @layer base {
   * {
@@ -121,4 +112,51 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Glassmorphism Base */
+.glass-card {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Neon Glow Effect */
+.neon-glow {
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3),
+              0 0 20px rgba(0, 255, 136, 0.2),
+              0 0 30px rgba(0, 255, 136, 0.1);
+}
+
+/* Selected State */
+.selected {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: #00ff88;
+}
+
+/* Hover Effects */
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+/* Glassmorphism Button */
+.glass-button {
+  background: rgba(0, 255, 136, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+/* Neon Text */
+.neon-text {
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }

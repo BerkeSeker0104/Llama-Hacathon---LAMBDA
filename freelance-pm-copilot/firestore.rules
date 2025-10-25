@@ -26,6 +26,39 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
+    // B2B Collections
+    match /companies/{companyId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /teams/{teamId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /people/{personId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /skills/{skillId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /personSkills/{personSkillId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /assignments/{assignmentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /planVersions/{versionId} {
+      allow read, write: if request.auth != null;
+    }
+
     // Demo için geçici - production'da kaldırılacak
     match /demo/{document=**} {
       allow read, write: if true;

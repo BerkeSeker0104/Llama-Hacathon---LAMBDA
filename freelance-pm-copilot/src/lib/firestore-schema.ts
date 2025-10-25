@@ -1,4 +1,86 @@
 // Firestore Schema and Data Models
+
+// B2B Multi-tenancy interfaces
+export interface Company {
+  id: string;
+  name: string;
+  industry: string;
+  licenseType: 'trial' | 'basic' | 'premium' | 'enterprise';
+  licenseExpiry: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Team {
+  id: string;
+  companyId: string;
+  name: string; // "Mobile Team", "Backend Team", "Frontend Team"
+  managerId: string; // User ID of team manager
+  description?: string;
+  createdAt: Date;
+}
+
+export interface Person {
+  id: string;
+  companyId: string;
+  teamId: string;
+  name: string;
+  email: string;
+  role: 'manager' | 'developer' | 'designer' | 'qa' | 'devops';
+  hoursPerWeek: number; // Haftalık müsait saat
+  currentWorkload: number; // Şu anki yük (0-100)
+  createdAt: Date;
+}
+
+export interface Skill {
+  id: string;
+  key: string; // "Flutter", "React", "Node.js", "PostgreSQL"
+  category: 'frontend' | 'backend' | 'mobile' | 'devops' | 'design';
+}
+
+export interface PersonSkill {
+  id: string;
+  personId: string;
+  skillId: string;
+  skillKey: string; // Denormalized for quick access
+  level: 1 | 2 | 3 | 4 | 5; // 1=Beginner, 5=Expert
+}
+
+export interface Project {
+  id: string;
+  contractId: string;
+  companyId: string;
+  name: string;
+  status: 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled';
+  startDate?: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Assignment {
+  id: string;
+  taskId: string;
+  personId: string;
+  personName: string; // Denormalized
+  plannedHours: number;
+  actualHours?: number;
+  sprintId: string;
+  status: 'assigned' | 'in-progress' | 'completed';
+  assignedAt: Date;
+}
+
+export interface PlanVersion {
+  id: string;
+  projectId: string;
+  contractId: string;
+  version: number;
+  changeReason?: string;
+  diffSummary?: string; // "3 tasks added, 2 reassigned"
+  createdAt: Date;
+  createdBy: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -7,6 +89,9 @@ export interface User {
   website?: string;
   timezone: string;
   currency: string;
+  companyId?: string; // B2B support
+  role?: 'admin' | 'manager' | 'employee'; // B2B roles
+  teamId?: string; // Team assignment
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +116,7 @@ export interface ContractAnalysis {
   milestones: Milestone[];
   paymentPlan: PaymentPlan[];
   risks: Risk[];
+  ambiguities?: Ambiguity[]; // B2B enhancement
   timeline: {
     optimistic: string;
     realistic: string;
@@ -38,6 +124,15 @@ export interface ContractAnalysis {
   };
   summary: string;
   analyzedAt: Date;
+}
+
+export interface Ambiguity {
+  id: string;
+  clause: string; // Belirsiz maddenin tam metni
+  issue: string; // Neyin belirsiz olduğu
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  suggestedRedline?: string; // Önerilen düzeltilmiş metin
+  clarificationQuestions?: string[]; // Netleştirme soruları
 }
 
 export interface Deliverable {
@@ -171,6 +266,12 @@ export interface Task {
   completedAt?: Date;
   // AI-generated task properties
   gorev_aciklamasi?: string; // Task description from AI
+  // B2B enhancements
+  epicId?: string; // WBS epic reference
+  requiredSkills?: string[]; // Required skills for this task
+  acceptanceCriteria?: string[]; // Acceptance criteria
+  dependsOn?: string[]; // Task dependencies
+  projectId?: string; // Project reference
 }
 
 // Firestore Collection Names
@@ -180,7 +281,16 @@ export const COLLECTIONS = {
   CHANGE_REQUESTS: 'changeRequests',
   COMMUNICATIONS: 'communications',
   PLANS: 'plans',
-  PAYMENTS: 'payments'
+  PAYMENTS: 'payments',
+  // B2B collections
+  COMPANIES: 'companies',
+  TEAMS: 'teams',
+  PEOPLE: 'people',
+  SKILLS: 'skills',
+  PERSON_SKILLS: 'personSkills',
+  PROJECTS: 'projects',
+  ASSIGNMENTS: 'assignments',
+  PLAN_VERSIONS: 'planVersions'
 } as const;
 
 // Helper functions for data validation

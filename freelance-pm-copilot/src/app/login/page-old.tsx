@@ -9,13 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signUp } = useAuth();
+  const { signIn } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,23 +22,14 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
 
-    if (password !== confirmPassword) {
-      setError('Şifreler eşleşmiyor');
-      setLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalı');
-      setLoading(false);
-      return;
-    }
-
     try {
-      await signUp(email, password);
+      console.log('Login: Attempting to sign in with email:', email);
+      await signIn(email, password);
+      console.log('Login: Sign in successful, redirecting to dashboard');
       router.push('/dashboard');
     } catch (error: any) {
-      setError(error.message || 'Hesap oluşturulamadı');
+      console.error('Login: Sign in error:', error);
+      setError(error.message || 'Giriş yapılamadı');
     } finally {
       setLoading(false);
     }
@@ -49,9 +39,9 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Hesap Oluştur</CardTitle>
+          <CardTitle>Giriş Yap</CardTitle>
           <CardDescription>
-            Serbest PM Asistanı çalışma alanınız için kayıt olun
+            Çalışma alanınıza erişmek için kimlik bilgilerinizi girin
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -76,28 +66,18 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Şifreyi Onayla</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
             {error && (
               <div className="text-red-500 text-sm">{error}</div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </Button>
           </form>
           <div className="mt-4 text-center">
             <span className="text-sm text-gray-600">
-              Zaten hesabınız var mı?{' '}
-              <Link href="/login" className="text-blue-600 hover:underline">
-                Giriş yap
+              Hesabınız yok mu?{' '}
+              <Link href="/register" className="text-blue-600 hover:underline">
+                Kayıt ol
               </Link>
             </span>
           </div>

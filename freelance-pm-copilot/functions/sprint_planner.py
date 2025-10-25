@@ -34,6 +34,107 @@ def get_contract_analysis(contract_id):
         print(f"Error getting contract analysis: {str(e)}")
         raise
 
+def generate_smart_sprint_plan(tasks, team_data, sprint_duration_weeks=2):
+    """
+    Generate sprint plan with skill-based assignments using Groq API
+    """
+    try:
+        # Prepare team data with skills and capacity
+        team_context = json.dumps({
+            "people": team_data["people"],
+            "skills": team_data["skills"],
+            "currentWorkload": team_data["workload"]
+        }, ensure_ascii=False)
+        
+        tasks_json = json.dumps(tasks, ensure_ascii=False, indent=2)
+        
+        # Smart sprint planning system prompt
+        SMART_SPRINT_PROMPT = f"""
+Sen, deneyimli bir Agile Scrum Master ve kaynak planlama uzmanısın.
+
+Görevin:
+1. Task'ları skill gereksinimlerine göre analiz et
+2. Ekip üyelerinin skill ve kapasitelerine göre atama yap
+3. Bağımlılıkları ve WIP limitlerini dikkate al
+4. Sprint'leri oluştur ve timeline tahminleri yap
+
+Çıktı formatı:
+{{
+  "sprints": [
+    {{
+      "sprintNum": 1,
+      "goal": "Sprint hedefi",
+      "startDate": "2025-01-15",
+      "endDate": "2025-01-29",
+      "tasks": [
+        {{
+          "taskId": "task_1",
+          "title": "Task başlığı",
+          "assignedTo": "person_id",
+          "assignedToName": "Ahmet Yılmaz",
+          "estimatedHours": 16,
+          "requiredSkills": ["Flutter"],
+          "assignmentReason": "5/5 Flutter skill, 20 saat müsait"
+        }}
+      ],
+      "totalCapacity": 160,
+      "totalPlanned": 140,
+      "utilizationRate": 87.5
+    }}
+  ],
+  "timeline": {{
+    "p50Days": 42,
+    "p75Days": 56,
+    "p90Days": 70
+  }},
+  "unassignedTasks": [],
+  "warnings": ["Uyarı mesajları"]
+}}
+"""
+        
+        # User prompt with tasks and team data
+        USER_PROMPT = f"""
+Lütfen aşağıdaki task'lar ve ekip bilgileri için smart sprint planı oluştur:
+
+Task'lar:
+{tasks_json}
+
+Ekip Bilgileri:
+{team_context}
+
+Talimat: 
+- Task'ları skill gereksinimlerine göre analiz et
+- Ekip üyelerinin skill seviyeleri ve müsaitliklerine göre atama yap
+- Bağımlılıkları dikkate al
+- {sprint_duration_weeks} haftalık sprint'ler oluştur
+- Her atama için gerekçe belirt
+- Timeline tahminleri yap (p50, p75, p90)
+
+Sadece yukarıdaki JSON formatını döndür.
+"""
+
+        # Call Groq API
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": SMART_SPRINT_PROMPT},
+                {"role": "user", "content": USER_PROMPT}
+            ],
+            temperature=0.2,
+            max_tokens=8192,
+            response_format={"type": "json_object"}
+        )
+        
+        json_string_response = completion.choices[0].message.content
+        sprint_plan_data = json.loads(json_string_response)
+        
+        print("Smart sprint planning completed successfully")
+        return sprint_plan_data
+
+    except Exception as e:
+        print(f"Error in smart sprint planning: {str(e)}")
+        raise
+
 def generate_sprint_plan_with_groq(contract_analysis, sprint_duration_weeks=2):
     """
     Generate sprint plan using Groq API
