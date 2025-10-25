@@ -11,7 +11,6 @@ import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { ContractService } from '@/lib/firestore-service';
 import PDFUpload from '@/components/PDFUpload';
 import ResponsiveHeader from '@/components/ResponsiveHeader';
-import Loading from '@/components/Loading';
 import { useToast } from '@/components/Toast';
 
 export default function NewContractPage() {
@@ -47,12 +46,21 @@ export default function NewContractPage() {
 
       setContractId(contractId);
       setStatus('idle');
-      addToast('success', 'Contract created successfully!', 'You can now upload the PDF file.');
-    } catch (error: any) {
+      addToast({
+        type: 'success',
+        title: 'Contract created successfully!',
+        description: 'You can now upload the PDF file.'
+      });
+    } catch (error) {
       console.error('Error creating contract:', error);
-      setError(error.message || 'Failed to create contract');
+      const message = error instanceof Error ? error.message : 'Failed to create contract';
+      setError(message);
       setStatus('error');
-      addToast('error', 'Failed to create contract', error.message);
+      addToast({
+        type: 'error',
+        title: 'Failed to create contract',
+        description: message
+      });
     }
   };
 
@@ -98,9 +106,10 @@ export default function NewContractPage() {
         setStatus('error');
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating contract:', error);
-      setError(error.message || 'Failed to update contract');
+      const message = error instanceof Error ? error.message : 'Failed to update contract';
+      setError(message);
       setStatus('error');
     }
   };

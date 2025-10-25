@@ -18,8 +18,8 @@ import {
   Mail,
   ArrowLeft
 } from 'lucide-react';
-import { ContractService, ChangeRequestService } from '@/lib/firestore-service';
-import { Contract, ChangeRequest } from '@/lib/firestore-schema';
+import { ContractService } from '@/lib/firestore-service';
+import { Contract, ContractAnalysis } from '@/lib/firestore-schema';
 
 // Using Contract interface from firestore-schema
 
@@ -80,33 +80,37 @@ export default function ContractDetailPage() {
   }
 
   // Mock analysis data for demo
-  const mockAnalysis = {
+  const mockAnalysis: ContractAnalysis = {
     deliverables: [
       {
         id: '1',
         title: 'Website Design',
         description: 'Complete responsive website design with modern UI/UX',
-        acceptanceCriteria: 'Design approved by client, mobile responsive, cross-browser compatible'
+        acceptanceCriteria: 'Design approved by client, mobile responsive, cross-browser compatible',
+        status: 'pending'
       },
       {
         id: '2',
         title: 'Backend Development',
         description: 'RESTful API development with database integration',
-        acceptanceCriteria: 'API endpoints functional, database optimized, security implemented'
+        acceptanceCriteria: 'API endpoints functional, database optimized, security implemented',
+        status: 'pending'
       }
     ],
     milestones: [
       {
         id: '1',
         title: 'Design Phase Complete',
+        description: 'Finalize design assets and deliver approved mockups',
         dueDate: '2024-02-15',
-        deliverableIds: ['1']
+        status: 'pending'
       },
       {
         id: '2',
         title: 'Development Phase Complete',
+        description: 'Complete backend implementation and deliver API documentation',
         dueDate: '2024-03-15',
-        deliverableIds: ['2']
+        status: 'pending'
       }
     ],
     paymentPlan: [
@@ -116,7 +120,7 @@ export default function ContractDetailPage() {
         amount: 5000,
         currency: 'USD',
         dueDate: '2024-02-15',
-        status: 'upcoming' as const
+        status: 'pending'
       },
       {
         id: '2',
@@ -124,27 +128,41 @@ export default function ContractDetailPage() {
         amount: 5000,
         currency: 'USD',
         dueDate: '2024-03-15',
-        status: 'upcoming' as const
+        status: 'pending'
       }
     ],
     risks: [
       {
         id: '1',
-        category: 'Scope',
-        severity: 'medium' as const,
-        description: 'Client may request additional features not specified in contract'
+        title: 'Scope creep',
+        description: 'Client may request additional features not specified in contract',
+        severity: 'medium',
+        probability: 45,
+        impact: 60,
+        mitigation: 'Schedule weekly alignment to manage new requests before approving scope changes',
+        status: 'open'
       },
       {
         id: '2',
-        category: 'Timeline',
-        severity: 'low' as const,
-        description: 'Potential delays due to client feedback cycles'
+        title: 'Feedback delays',
+        description: 'Potential delays due to extended client review cycles',
+        severity: 'low',
+        probability: 30,
+        impact: 40,
+        mitigation: 'Agree on review SLAs and share weekly progress updates to keep feedback moving',
+        status: 'open'
       }
     ],
-    scope: 'Full-stack web application development including design, frontend, backend, and deployment'
+    timeline: {
+      optimistic: '6 weeks',
+      realistic: '8 weeks',
+      pessimistic: '10 weeks'
+    },
+    summary: 'Full-stack web application development including design, frontend, backend, and deployment.',
+    analyzedAt: new Date()
   };
 
-  const analysis = contract.analysis || mockAnalysis;
+  const analysis: ContractAnalysis = contract.analysis ?? mockAnalysis;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -247,10 +265,13 @@ export default function ContractDetailPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Project Scope</CardTitle>
+                <CardTitle>Project Summary</CardTitle>
+                <CardDescription>
+                  High-level overview of the analyzed contract scope
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700">{analysis.scope}</p>
+                <p className="text-gray-700">{analysis.summary}</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -333,20 +354,27 @@ export default function ContractDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analysis.risks.map((risk) => (
-                    <div key={risk.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium">{risk.category}</h3>
-                        <Badge 
-                          variant={risk.severity === 'high' ? 'destructive' : 
-                                  risk.severity === 'medium' ? 'default' : 'secondary'}
-                        >
-                          {risk.severity}
-                        </Badge>
+                  {analysis.risks.map((risk) => {
+                    const severityVariant =
+                      risk.severity === 'critical'
+                        ? 'destructive'
+                        : risk.severity === 'high'
+                        ? 'default'
+                        : 'secondary';
+
+                    return (
+                      <div key={risk.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium">{risk.title}</h3>
+                          <Badge variant={severityVariant}>{risk.severity}</Badge>
+                        </div>
+                        <p className="text-gray-600 mb-2">{risk.description}</p>
+                        <p className="text-sm text-gray-500">
+                          Probability: {risk.probability}% · Impact: {risk.impact}% · Status: {risk.status}
+                        </p>
                       </div>
-                      <p className="text-gray-600">{risk.description}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

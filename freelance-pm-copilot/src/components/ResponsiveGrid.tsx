@@ -3,15 +3,17 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
+type GridSpan = 1 | 2 | 3 | 4 | 5 | 6;
+
 interface ResponsiveGridProps {
   children: React.ReactNode;
   className?: string;
   cols?: {
-    default?: number;
-    sm?: number;
-    md?: number;
-    lg?: number;
-    xl?: number;
+    default?: GridSpan;
+    sm?: GridSpan;
+    md?: GridSpan;
+    lg?: GridSpan;
+    xl?: GridSpan;
   };
   gap?: 'sm' | 'md' | 'lg';
 }
@@ -28,7 +30,7 @@ export default function ResponsiveGrid({
     lg: 'gap-6'
   };
 
-  const gridCols = {
+  const gridCols: Record<GridSpan, string> = {
     1: 'grid-cols-1',
     2: 'grid-cols-2',
     3: 'grid-cols-3',
