@@ -70,46 +70,74 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
     """
     Download PDF from Firebase Storage to temporary file using Firebase Admin SDK
     """
+    print("=== download_pdf_from_storage START ===")
+    print(f"PDF URL: {pdf_url}")
+    print(f"PDF Path: {pdf_path}")
+    print(f"Bucket name: {bucket.name}")
+    
     try:
         object_path = None
 
         if pdf_path:
+            print("Using pdf_path...")
             # Accept full gs:// URIs or relative storage paths
             if pdf_path.startswith("gs://"):
                 object_path = pdf_path.split("/", 3)[-1]
+                print(f"Extracted from gs:// URI: {object_path}")
             else:
                 object_path = pdf_path.lstrip("/")
+                print(f"Using relative path: {object_path}")
         elif pdf_url:
+            print("Using pdf_url...")
             # Extract path from Firebase Storage URL
             if "firebasestorage.googleapis.com" in pdf_url:
+                print("Parsing firebasestorage.googleapis.com URL...")
                 # Parse Firebase Storage URL: https://firebasestorage.googleapis.com/v0/b/bucket/o/path?alt=media
                 from urllib.parse import urlparse, unquote
                 parsed_url = urlparse(pdf_url)
                 path_parts = parsed_url.path.split('/')
+                print(f"URL path parts: {path_parts}")
                 if len(path_parts) >= 6 and path_parts[1] == "v0" and path_parts[2] == "b" and path_parts[4] == "o":
                     # Extract the file path after /o/
                     object_path = unquote(path_parts[5]) if len(path_parts) > 5 else None
+                    print(f"Extracted object path: {object_path}")
             else:
+                print("Using extract_storage_path_from_url...")
                 object_path = extract_storage_path_from_url(pdf_url)
 
+        print(f"Final object_path: {object_path}")
+        
         if not object_path:
             raise ValueError("Could not determine storage object path for PDF")
         
         # Use Firebase Admin SDK to download the file
+        print(f"Creating blob for path: {object_path}")
         blob = bucket.blob(object_path)
         
         # Check if file exists
+        print("Checking if file exists...")
         if not blob.exists():
+            print(f"ERROR: File does not exist in storage: {object_path}")
+            print(f"Bucket: {bucket.name}")
+            print(f"Full blob path: {blob.name}")
             raise ValueError(f"File does not exist in storage: {object_path}")
         
+        print("File exists, downloading...")
         # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
         blob.download_to_filename(temp_file.name)
+        print(f"Downloaded to: {temp_file.name}")
         
         return temp_file.name
         
     except Exception as e:
-        print(f"Error downloading PDF: {str(e)}")
+        print(f"=== ERROR in download_pdf_from_storage ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        print(f"Error details: {repr(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END ERROR ===")
         raise
 
 def extract_storage_path_from_url(pdf_url: str) -> str:

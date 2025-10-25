@@ -17,26 +17,46 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
     """
     Cloud Function to analyze contract PDF using AI
     """
+    print("=== analyzeContract START ===")
+    
     try:
+        # Log request details
+        print(f"Request method: {req.method}")
+        print(f"Request headers: {dict(req.headers)}")
+        
         # Import here to avoid circular imports
+        print("Importing contract_analyzer...")
         from contract_analyzer import analyze_contract
+        print("contract_analyzer imported successfully")
         
         # Get request data
+        print("Parsing request JSON...")
         data = req.get_json()
+        print(f"Request data: {data}")
+        
         if not data:
+            print("ERROR: No data provided")
             return https_fn.Response("No data provided", status=400)
         
         contract_id = data.get('contractId')
         pdf_url = data.get('pdfUrl')
         pdf_path = data.get('pdfPath')
         
+        print(f"Contract ID: {contract_id}")
+        print(f"PDF URL: {pdf_url}")
+        print(f"PDF Path: {pdf_path}")
+        
         if not contract_id or not (pdf_url or pdf_path):
+            print("ERROR: Missing contractId or PDF reference")
             return https_fn.Response("Missing contractId or PDF reference", status=400)
         
         # Call the contract analyzer
+        print("Calling analyze_contract...")
         analysis_result = analyze_contract(contract_id, pdf_url, pdf_path)
+        print(f"Analysis result: {analysis_result}")
         
         if analysis_result.get('success'):
+            print("Analysis completed successfully")
             return https_fn.Response(
                 json.dumps({
                     'success': True,
@@ -47,6 +67,7 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
                 headers={'Content-Type': 'application/json'}
             )
         else:
+            print(f"Analysis failed: {analysis_result.get('error', 'Unknown error')}")
             return https_fn.Response(
                 json.dumps({
                     'success': False,
@@ -57,9 +78,20 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
             )
             
     except Exception as e:
-        print(f"Error in analyzeContract: {str(e)}")
+        print(f"=== CRITICAL ERROR in analyzeContract ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        print(f"Error details: {repr(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        print("=== END ERROR ===")
+        
         return https_fn.Response(
-            json.dumps({'success': False, 'error': str(e)}),
+            json.dumps({
+                'success': False, 
+                'error': f"Critical error: {str(e)}",
+                'error_type': type(e).__name__
+            }),
             status=500,
             headers={'Content-Type': 'application/json'}
         )
