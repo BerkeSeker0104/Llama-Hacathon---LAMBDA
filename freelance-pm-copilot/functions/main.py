@@ -7,7 +7,7 @@ import requests
 
 # Initialize Firebase Admin
 try:
-    initialize_app()
+    initialize_app(options={'storageBucket': 'lambda-926aa.firebasestorage.app'})
 except ValueError:
     # App already initialized
     pass
