@@ -18,14 +18,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  console.log('AuthProvider: Initial state - user:', user, 'loading:', loading);
-
   useEffect(() => {
     console.log('AuthContext: Setting up auth state listener');
-    
-    // Reset state first
-    setUser(null);
-    setLoading(true);
     
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log('AuthContext: Auth state changed, user:', user ? user.email : 'null');
