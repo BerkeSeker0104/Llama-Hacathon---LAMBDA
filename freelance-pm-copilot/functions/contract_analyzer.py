@@ -22,9 +22,9 @@ def get_secret(secret_id):
         # Fallback to environment variable
         return os.environ.get(secret_id)
 
-# Initialize clients with Secret Manager
-groq_client = Groq(api_key=get_secret("GROQ_API_KEY"))
-llama_api_key = get_secret("LLAMA_API_KEY")
+# Initialize clients with hardcoded keys (matching AI team's approach)
+groq_client = Groq(api_key="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")
+llama_api_key = "llx-SHymI9q0Tr65lYHubePG7sH2BwFo3myVLst8NuJThdP7x1LS"
 
 # Initialize Firebase clients
 db = firestore.client()
@@ -151,11 +151,21 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
                     return temp_file.name
                 else:
                     print(f"Direct download failed with status: {response.status_code}")
+                    # Try to list files in the bucket to debug
+                    print("Listing files in bucket for debugging...")
+                    blobs = bucket.list_blobs(prefix="contracts/")
+                    for blob_item in blobs:
+                        print(f"Found blob: {blob_item.name}")
                     raise ValueError(f"File does not exist in storage: {object_path}")
             else:
                 print(f"ERROR: File does not exist in storage: {object_path}")
                 print(f"Bucket: {bucket.name}")
                 print(f"Full blob path: {blob.name}")
+                # Try to list files in the bucket to debug
+                print("Listing files in bucket for debugging...")
+                blobs = bucket.list_blobs(prefix="contracts/")
+                for blob_item in blobs:
+                    print(f"Found blob: {blob_item.name}")
                 raise ValueError(f"File does not exist in storage: {object_path}")
         
         print("File exists, downloading...")

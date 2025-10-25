@@ -11,6 +11,8 @@ env:
     value: "1061268013673"
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "1:1061268013673:web:6f2f97c602ad77f14658f8"
+  - variable: NEXT_PUBLIC_CLOUD_FUNCTIONS_URL
+    value: "https://us-central1-lambda-926aa.cloudfunctions.net"
   - variable: RESEND_API_KEY
     value: "demo-key"
   - variable: RESEND_FROM_EMAIL

@@ -19,14 +19,18 @@ export async function POST(request: NextRequest) {
     
     // Call the Cloud Function for contract analysis
     const cloudFunctionUrl = process.env.NEXT_PUBLIC_CLOUD_FUNCTIONS_URL || 
-      `https://us-central1-${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.cloudfunctions.net/analyzeContract`;
+      `https://us-central1-lambda-926aa.cloudfunctions.net/analyzeContract`;
+    
+    console.log(`Environment NEXT_PUBLIC_CLOUD_FUNCTIONS_URL: ${process.env.NEXT_PUBLIC_CLOUD_FUNCTIONS_URL}`);
+    console.log(`Final Cloud Function URL: ${cloudFunctionUrl}`);
+    
+    console.log(`Calling Cloud Function: ${cloudFunctionUrl}`);
     
     try {
       const response = await fetch(cloudFunctionUrl, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.CLOUD_FUNCTIONS_TOKEN || ''}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ contractId, pdfUrl, pdfPath })
       });
