@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
     console.log(`Triggering AI analysis for contract ${contractId} with PDF: ${pdfUrl || pdfPath}`);
     
     // Call the Cloud Function for contract analysis
-    const cloudFunctionUrl = process.env.NEXT_PUBLIC_CLOUD_FUNCTIONS_URL || 
-      `https://us-central1-lambda-926aa.cloudfunctions.net/analyzeContract`;
+    const cloudFunctionUrl = `https://us-central1-lambda-926aa.cloudfunctions.net/analyzeContract`;
     
     console.log(`Environment NEXT_PUBLIC_CLOUD_FUNCTIONS_URL: ${process.env.NEXT_PUBLIC_CLOUD_FUNCTIONS_URL}`);
     console.log(`Final Cloud Function URL: ${cloudFunctionUrl}`);
