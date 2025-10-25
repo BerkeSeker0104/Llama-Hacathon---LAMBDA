@@ -5,3 +5,4 @@ groq==0.4.1
 llama-cloud-services==0.6.76
 python-dotenv>=1.0.1
 requests==2.31.0
+httpx>=0.23,<0.28

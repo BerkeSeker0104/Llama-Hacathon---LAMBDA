@@ -11,7 +11,7 @@ load_dotenv()
 
 # Initialize clients
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-llama_api_key = os.environ.get("LLAMA_API_KEY")
+llama_api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
 
 # Initialize Firebase clients
 db = firestore.client()
@@ -107,7 +107,9 @@ def parse_pdf_with_llama(pdf_path):
     try:
         parser = LlamaParse(
             api_key=llama_api_key,
-            result_type="text"
+            num_workers=4,
+            verbose=True,
+            language="tr",  # Turkish language for better results
         )
 
         # Parse the PDF
