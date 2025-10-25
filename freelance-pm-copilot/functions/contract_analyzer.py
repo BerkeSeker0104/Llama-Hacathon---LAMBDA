@@ -107,7 +107,6 @@ def parse_pdf_with_llama(pdf_path):
     try:
         parser = LlamaParse(
             api_key=llama_api_key,
-            num_workers=4,
             verbose=True,
             language="tr",  # Turkish language for better results
         )
