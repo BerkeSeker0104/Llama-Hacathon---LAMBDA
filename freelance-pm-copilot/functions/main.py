@@ -28,12 +28,13 @@ def analyzeContract(req: https_fn.Request) -> https_fn.Response:
         
         contract_id = data.get('contractId')
         pdf_url = data.get('pdfUrl')
+        pdf_path = data.get('pdfPath')
         
-        if not contract_id or not pdf_url:
-            return https_fn.Response("Missing contractId or pdfUrl", status=400)
+        if not contract_id or not (pdf_url or pdf_path):
+            return https_fn.Response("Missing contractId or PDF reference", status=400)
         
         # Call the contract analyzer
-        analysis_result = analyze_contract(contract_id, pdf_url)
+        analysis_result = analyze_contract(contract_id, pdf_url, pdf_path)
         
         if analysis_result.get('success'):
             return https_fn.Response(

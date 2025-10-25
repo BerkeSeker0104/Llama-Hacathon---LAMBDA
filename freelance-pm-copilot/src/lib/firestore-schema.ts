@@ -19,6 +19,7 @@ export interface Contract {
   clientEmail: string;
   status: 'analyzing' | 'analyzed' | 'active' | 'completed' | 'cancelled' | 'error';
   pdfUrl?: string;
+  pdfPath?: string;
   analysis?: ContractAnalysis;
   createdAt: Date;
   updatedAt: Date;

@@ -4,9 +4,9 @@ import { ContractService } from '@/lib/firestore-service';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { contractId, pdfUrl } = body;
+    const { contractId, pdfUrl, pdfPath } = body;
 
-    if (!contractId || !pdfUrl) {
+    if (!contractId || (!pdfUrl && !pdfPath)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       status: 'analyzing'
     });
 
-    console.log(`Triggering AI analysis for contract ${contractId} with PDF: ${pdfUrl}`);
+    console.log(`Triggering AI analysis for contract ${contractId} with PDF: ${pdfUrl || pdfPath}`);
     
     // Call the Cloud Function for contract analysis
     const cloudFunctionUrl = process.env.NEXT_PUBLIC_CLOUD_FUNCTIONS_URL || 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${process.env.CLOUD_FUNCTIONS_TOKEN || ''}`
         },
-        body: JSON.stringify({ contractId, pdfUrl })
+        body: JSON.stringify({ contractId, pdfUrl, pdfPath })
       });
 
       if (!response.ok) {

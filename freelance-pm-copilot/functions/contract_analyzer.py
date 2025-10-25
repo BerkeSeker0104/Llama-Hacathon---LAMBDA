@@ -66,32 +66,27 @@ Başka hiçbir açıklama, selamlama veya yorum yapma.
 }
 """
 
-def download_pdf_from_storage(pdf_url):
+def download_pdf_from_storage(pdf_url=None, pdf_path=None):
     """
     Download PDF from Firebase Storage to temporary file
     """
     try:
-        # Extract bucket and file path from URL
-        # URL format: https://firebasestorage.googleapis.com/v0/b/BUCKET_NAME/o/PATH%2FFILE.pdf?alt=media
-        if 'firebasestorage.googleapis.com' not in pdf_url:
-            raise ValueError("Invalid Firebase Storage URL")
-        
-        # Parse the URL to get the file path
-        from urllib.parse import urlparse, unquote
-        parsed_url = urlparse(pdf_url)
+        object_path = None
 
-        # Firebase download URLs look like:
-        # https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encoded_path>?alt=media&token=...
-        # We only need the encoded object path that comes after `/o/`.
-        path_after_object_marker = parsed_url.path.split('/o/')
-        if len(path_after_object_marker) != 2 or not path_after_object_marker[1]:
-            raise ValueError("Invalid Firebase Storage URL format")
+        if pdf_path:
+            # Accept full gs:// URIs or relative storage paths
+            if pdf_path.startswith("gs://"):
+                object_path = pdf_path.split("/", 3)[-1]
+            else:
+                object_path = pdf_path.lstrip("/")
+        elif pdf_url:
+            object_path = extract_storage_path_from_url(pdf_url)
 
-        # Decode the object path so it can be used with the Storage SDK
-        file_path = unquote(path_after_object_marker[1])
+        if not object_path:
+            raise ValueError("Could not determine storage object path for PDF")
         
         # Download the file
-        blob = bucket.blob(file_path)
+        blob = bucket.blob(object_path)
         
         # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
@@ -102,6 +97,42 @@ def download_pdf_from_storage(pdf_url):
     except Exception as e:
         print(f"Error downloading PDF: {str(e)}")
         raise
+
+def extract_storage_path_from_url(pdf_url: str) -> str:
+    """
+    Extract the storage object path from a Firebase Storage download URL.
+    Supports both firebasestorage.googleapis.com and storage.googleapis.com formats.
+    """
+    from urllib.parse import urlparse, unquote, parse_qs
+
+    parsed_url = urlparse(pdf_url)
+    host = parsed_url.netloc
+    path = parsed_url.path
+    bucket_name = bucket.name
+
+    # Format: https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encoded_path>
+    if 'firebasestorage.googleapis.com' in host:
+        if '/o/' in path:
+            encoded_path = path.split('/o/', 1)[1]
+            return unquote(encoded_path)
+        # Some URLs may include the object path in query params
+        query_params = parse_qs(parsed_url.query)
+        if 'name' in query_params:
+            return unquote(query_params['name'][0])
+
+    # Format: https://storage.googleapis.com/<bucket>/<object_path>
+    if host == 'storage.googleapis.com':
+        parts = path.lstrip('/').split('/', 1)
+        if len(parts) == 2 and parts[0] == bucket_name:
+            return unquote(parts[1])
+
+    # Format: https://<bucket>.storage.googleapis.com/<object_path>
+    if host.endswith('.storage.googleapis.com'):
+        potential_bucket = host.replace('.storage.googleapis.com', '')
+        if potential_bucket == bucket_name:
+            return unquote(path.lstrip('/'))
+
+    raise ValueError("Invalid Firebase Storage URL format")
 
 def parse_pdf_with_llama(pdf_path):
     """
@@ -194,7 +225,7 @@ def save_analysis_to_firestore(contract_id, analysis_data):
         print(f"Error saving to Firestore: {str(e)}")
         raise
 
-def analyze_contract(contract_id, pdf_url):
+def analyze_contract(contract_id, pdf_url, pdf_path=None):
     """
     Main function to analyze contract PDF
     """
@@ -205,7 +236,7 @@ def analyze_contract(contract_id, pdf_url):
         
         # Step 1: Download PDF from Firebase Storage
         print("Downloading PDF from Firebase Storage...")
-        temp_file_path = download_pdf_from_storage(pdf_url)
+        temp_file_path = download_pdf_from_storage(pdf_url=pdf_url, pdf_path=pdf_path)
         
         # Step 2: Parse PDF with LlamaParse
         print("Parsing PDF with LlamaParse...")

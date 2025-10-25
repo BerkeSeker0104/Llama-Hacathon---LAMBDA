@@ -74,6 +74,7 @@ export default function NewContractPage() {
       // Update contract with PDF URL
       await ContractService.updateContract(contractId, {
         pdfUrl: result.url,
+        pdfPath: result.path,
         status: 'analyzing'
       });
 
@@ -86,7 +87,8 @@ export default function NewContractPage() {
           },
           body: JSON.stringify({
             contractId,
-            pdfUrl: result.url
+            pdfUrl: result.url,
+            pdfPath: result.path
           }),
         });
 
