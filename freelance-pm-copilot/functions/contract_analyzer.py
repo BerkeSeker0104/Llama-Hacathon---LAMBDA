@@ -5,13 +5,26 @@ from groq import Groq
 from llama_cloud_services import LlamaParse
 from firebase_admin import firestore, storage
 from dotenv import load_dotenv
+from google.cloud import secretmanager
 
 # Load environment variables
 load_dotenv()
 
-# Initialize clients
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-llama_api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
+def get_secret(secret_id):
+    """Get secret from Google Cloud Secret Manager"""
+    try:
+        client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/lambda-926aa/secrets/{secret_id}/versions/latest"
+        response = client.access_secret_version(request={"name": name})
+        return response.payload.data.decode("UTF-8")
+    except Exception as e:
+        print(f"Error getting secret {secret_id}: {str(e)}")
+        # Fallback to environment variable
+        return os.environ.get(secret_id)
+
+# Initialize clients with Secret Manager
+groq_client = Groq(api_key=get_secret("GROQ_API_KEY"))
+llama_api_key = get_secret("LLAMA_API_KEY")
 
 # Initialize Firebase clients
 db = firestore.client()
@@ -102,8 +115,11 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
                 path_parts = parsed_url.path.split('/')
                 print(f"URL path parts: {path_parts}")
                 if len(path_parts) >= 6 and path_parts[1] == "v0" and path_parts[2] == "b" and path_parts[4] == "o":
-                    # Extract the file path after /o/
-                    object_path = unquote(path_parts[5]) if len(path_parts) > 5 else None
+                    # Join all parts after /o/ to get full path
+                    encoded_path = '/'.join(path_parts[5:])
+                    # Remove query parameters
+                    encoded_path = encoded_path.split('?')[0] if '?' in encoded_path else encoded_path
+                    object_path = unquote(encoded_path)
                     print(f"Extracted object path: {object_path}")
             else:
                 print("Using extract_storage_path_from_url...")
@@ -121,10 +137,26 @@ def download_pdf_from_storage(pdf_url=None, pdf_path=None):
         # Check if file exists
         print("Checking if file exists...")
         if not blob.exists():
-            print(f"ERROR: File does not exist in storage: {object_path}")
-            print(f"Bucket: {bucket.name}")
-            print(f"Full blob path: {blob.name}")
-            raise ValueError(f"File does not exist in storage: {object_path}")
+            print(f"Blob doesn't exist, trying alternative download method...")
+            # Fallback: Use the download URL directly
+            if pdf_url:
+                import requests
+                print(f"Attempting direct download from URL: {pdf_url}")
+                response = requests.get(pdf_url)
+                if response.status_code == 200:
+                    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+                    temp_file.write(response.content)
+                    temp_file.close()
+                    print(f"Downloaded via direct URL to: {temp_file.name}")
+                    return temp_file.name
+                else:
+                    print(f"Direct download failed with status: {response.status_code}")
+                    raise ValueError(f"File does not exist in storage: {object_path}")
+            else:
+                print(f"ERROR: File does not exist in storage: {object_path}")
+                print(f"Bucket: {bucket.name}")
+                print(f"Full blob path: {blob.name}")
+                raise ValueError(f"File does not exist in storage: {object_path}")
         
         print("File exists, downloading...")
         # Create temporary file
