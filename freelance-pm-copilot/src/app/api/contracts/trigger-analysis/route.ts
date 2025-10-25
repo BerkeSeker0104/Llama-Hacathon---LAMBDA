@@ -3,10 +3,17 @@ import { ContractService } from '@/lib/firestore-service';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== Next.js API Route START ===');
+    console.log('Request method:', request.method);
+    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    
     const body = await request.json();
+    console.log('Request body:', body);
+    
     const { contractId, pdfUrl, pdfPath } = body;
 
     if (!contractId || (!pdfUrl && !pdfPath)) {
+      console.log('Missing required fields');
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
