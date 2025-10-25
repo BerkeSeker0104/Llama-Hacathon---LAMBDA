@@ -33,7 +33,10 @@ export default function ResponsiveHeader({
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/');
+      // Wait a bit for auth state to update
+      setTimeout(() => {
+        router.push('/');
+      }, 100);
     } catch (error) {
       console.error('Logout error:', error);
     }
